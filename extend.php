@@ -5,7 +5,7 @@ use Flarum\Extend;
 return [
     (new Extend\Frontend('forum'))
         ->css(__DIR__ . '/resources/css/audio-player.css')
-        ->js(__DIR__ . '/resources/js/audio-player.js'),
+        ->js(__DIR__ . '/js/dist/forum.js'),
 
     (new Extend\Formatter)
         ->configure(function ($config) {
