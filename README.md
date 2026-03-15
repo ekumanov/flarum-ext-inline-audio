@@ -27,9 +27,9 @@ composer require ekumanov/flarum-ext-inline-audio
 
 ## FoF Upload Integration
 
-This extension works automatically alongside [FoF Upload](https://github.com/FriendsOfFlarum/upload). When a user uploads an audio file, FoF Upload inserts a link into the post — this extension then detects that link and renders it as an inline player.
+If you use [FoF Upload](https://github.com/FriendsOfFlarum/upload) and want audio files to automatically render as inline players after uploading — without requiring users to manually wrap links in `[player]` tags — you can register a filename-link upload template in your forum's `extend.php`.
 
-FoF Upload does not ship with a filename-link template by default. Add the following to your forum's `extend.php` to register one:
+FoF Upload does not ship with this template; add it yourself as follows:
 
 ```php
 use FoF\Upload\Contracts\Template;
