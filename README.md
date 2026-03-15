@@ -1,38 +1,59 @@
-# Inline Audio Player for Flarum
+> ℹ️ If you've been using [Inline Audio (aka Audio URL to Player)](https://discuss.flarum.org/d/27255-inline-audio-aka-audio-url-to-player), that extension has been abandoned. This is a fresh, actively maintained replacement built for Flarum 1.8.
 
-A Flarum extension that automatically converts audio file links in posts into inline `<audio>` players, with an optional `[player]` BBCode tag.
+---
 
-![Inline audio player in a Flarum post](docs/player.png)
+## Inline Audio Player
 
-## Features
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/ekumanov/flarum-ext-inline-audio/blob/main/LICENSE)
+[![Latest Stable Version](https://img.shields.io/packagist/v/ekumanov/flarum-ext-inline-audio.svg)](https://packagist.org/packages/ekumanov/flarum-ext-inline-audio)
+[![Total Downloads](https://img.shields.io/packagist/dt/ekumanov/flarum-ext-inline-audio.svg)](https://packagist.org/packages/ekumanov/flarum-ext-inline-audio)
 
-- Auto-detects links to audio files (`.mp3`, `.wav`, `.ogg`, `.flac`, `.m4a`, `.aac`, `.webm`, and more) and replaces them with an inline player
-- Pauses other players on the page when a new one starts
+A Flarum extension that automatically converts audio file links in posts into inline players, with an optional `[player]` BBCode tag.
+
+![Screenshot](https://raw.githubusercontent.com/ekumanov/flarum-ext-inline-audio/main/docs/player.png)
+
+---
+
+### Features
+
+- Auto-detects links to audio files and replaces them with an inline player — no BBCode required
+- When a player starts, any other playing audio on the page is paused automatically
 - `[player]URL[/player]` BBCode for explicit embedding
 - Works seamlessly with [FoF Upload](https://github.com/FriendsOfFlarum/upload) when using a filename-link upload template (see below)
 
-## Installation
+**Supported formats:** `mp3` · `wav` · `ogg` · `flac` · `m4a` · `aac` · `webm` · `mp4` · `mpeg` · `mpg` · `wave`
 
+---
+
+### Installation
 ```bash
 composer require ekumanov/flarum-ext-inline-audio
 ```
 
-## Supported Formats
+### Update
+```bash
+composer update ekumanov/flarum-ext-inline-audio
+```
 
-`mp3` · `wav` · `ogg` · `flac` · `m4a` · `aac` · `webm` · `mp4` · `mpeg` · `mpg` · `wave`
+### Uninstall
+```bash
+composer remove ekumanov/flarum-ext-inline-audio
+```
 
-## BBCode
+---
 
+### BBCode
 ```
 [player]https://example.com/audio/track.mp3[/player]
 ```
 
-## FoF Upload Integration
+---
+
+### FoF Upload Integration
 
 If you use [FoF Upload](https://github.com/FriendsOfFlarum/upload) and want audio files to automatically render as inline players after uploading — without requiring users to manually wrap links in `[player]` tags — you can register a filename-link upload template in your forum's `extend.php`.
 
 FoF Upload does not ship with this template; add it yourself as follows:
-
 ```php
 use FoF\Upload\Contracts\Template;
 use FoF\Upload\File;
@@ -66,12 +87,14 @@ class FilenameLinkServiceProvider extends AbstractServiceProvider
 
 Once registered, select **Filename link** as the upload template in the FoF Upload admin settings.
 
-To restrict the template to audio files only, set a MIME type filter in FoF Upload using a regex such as:
-
+To restrict the template to audio files only, set a MIME type filter in FoF Upload using this regex:
 ```
 ^audio\/(flac|x-flac|mp3|x-mp3|mpg|mpeg|mpeg3|x-mpeg|x-mpeg3|x-mpg|x-mp4a|x-mpegaudio|mp4|vnd.wave|wav|wave|x-wav|x-pn-wav|ogg|x-ogg|x-ogg-flac)
 ```
 
-## License
+---
 
-MIT
+### Links
+
+* [GitHub](https://github.com/ekumanov/flarum-ext-inline-audio)
+* [Packagist](https://packagist.org/packages/ekumanov/flarum-ext-inline-audio)
