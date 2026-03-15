@@ -2,6 +2,8 @@
 
 A Flarum extension that automatically converts audio file links in posts into inline `<audio>` players, with an optional `[player]` BBCode tag.
 
+![Inline audio player in a Flarum post](docs/player.png)
+
 ## Features
 
 - Auto-detects links to audio files (`.mp3`, `.wav`, `.ogg`, `.flac`, `.m4a`, `.aac`, `.webm`, and more) and replaces them with an inline player
