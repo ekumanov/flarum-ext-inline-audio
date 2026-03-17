@@ -17,31 +17,44 @@ app.initializers.add('ekumanov/flarum-ext-inline-audio', () => {
         return text || decodeURIComponent(a.href.split('/').pop().split('?')[0]);
     }
 
+    function filenameFromUrl(url) {
+        try { return decodeURIComponent(url.split('/').pop().split('?')[0]); }
+        catch (e) { return url.split('/').pop().split('?')[0]; }
+    }
+
     function processPost(el) {
+        // Auto-detected audio links → build full collapsible player
         el.querySelectorAll('a[href]:not([data-ap])').forEach((a) => {
             if (!audioRe.test(a.getAttribute('href'))) return;
             a.setAttribute('data-ap', '1');
 
-            const wrap = document.createElement('span');
-            wrap.className = 'pc-audio-wrap';
+            const details = document.createElement('details');
+            details.className = 'pc-audio-wrap';
 
-            const name = document.createElement('a');
-            name.className = 'pc-audio-name';
-            name.href = a.href;
-            name.target = '_blank';
-            name.download = '';
-            name.setAttribute('data-ap', '1');
-            name.textContent = getFilename(a);
+            const summary = document.createElement('summary');
+            summary.className = 'pc-audio-name';
+            summary.textContent = getFilename(a);
 
             const au = document.createElement('audio');
             au.controls = true;
             au.preload = 'none';
             au.src = a.href;
-            au.setAttribute('aria-label', name.textContent);
+            au.setAttribute('aria-label', summary.textContent);
 
-            wrap.appendChild(name);
-            wrap.appendChild(au);
-            a.parentNode.replaceChild(wrap, a);
+            details.appendChild(summary);
+            details.appendChild(au);
+            a.parentNode.replaceChild(details, a);
+        });
+
+        // [player] BBCode → PHP already output <details>, just fill in the filename
+        el.querySelectorAll('details.pc-audio-wrap[data-audio-url]:not([data-ap])').forEach((details) => {
+            details.setAttribute('data-ap', '1');
+            const url = details.getAttribute('data-audio-url');
+            const name = filenameFromUrl(url);
+            const summary = details.querySelector('.pc-audio-name');
+            if (summary) summary.textContent = name;
+            const au = details.querySelector('audio');
+            if (au) au.setAttribute('aria-label', name);
         });
     }
 
@@ -65,8 +78,17 @@ app.initializers.add('ekumanov/flarum-ext-inline-audio', () => {
 
     document.addEventListener('play', (e) => {
         if (e.target.tagName !== 'AUDIO') return;
-        document.querySelectorAll('.pc-audio-wrap audio').forEach((audio) => {
-            if (audio !== e.target) audio.pause();
+        document.querySelectorAll('audio').forEach((audio) => {
+            if (audio !== e.target) {
+                audio.pause();
+                audio.closest('.pc-audio-wrap')?.removeAttribute('data-playing');
+            }
         });
+        e.target.closest('.pc-audio-wrap')?.setAttribute('data-playing', '');
+    }, true);
+
+    document.addEventListener('pause', (e) => {
+        if (e.target.tagName !== 'AUDIO') return;
+        e.target.closest('.pc-audio-wrap')?.removeAttribute('data-playing');
     }, true);
 });
