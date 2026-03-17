@@ -1,7 +1,141 @@
 import app from 'flarum/forum/app';
 
+// Set to false to load the track into the bar without auto-starting playback
+const AUTO_PLAY_ON_SELECT = true;
+
 app.initializers.add('ekumanov/flarum-ext-inline-audio', () => {
     const audioRe = /\.(mp3|wav|ogg|flac|m4a|mpeg|mpg|mp4|wave|aac|webm)(\?[^#]*)?(#.*)?$/i;
+
+    // ── Build the global player bar ───────────────────────────────────────────
+
+    const bar = document.createElement('div');
+    bar.className = 'pc-player-bar';
+    bar.hidden = true;
+    bar.setAttribute('role', 'region');
+    bar.setAttribute('aria-label', 'Audio player');
+
+    const barName = document.createElement('button');
+    barName.className = 'pc-player-bar-name';
+    barName.setAttribute('aria-label', 'Scroll to post');
+
+    const barAudio = document.createElement('audio');
+    barAudio.controls = true;
+    barAudio.preload = 'none';
+
+    const barDownload = document.createElement('a');
+    barDownload.className = 'pc-player-bar-download';
+    barDownload.setAttribute('aria-label', 'Download');
+
+    const barClose = document.createElement('button');
+    barClose.className = 'pc-player-bar-close';
+    barClose.setAttribute('aria-label', 'Close player');
+    barClose.textContent = '✕';
+
+    bar.append(barName, barAudio, barDownload, barClose);
+    document.body.appendChild(bar);
+
+    // ── Track the active filename button ──────────────────────────────────────
+
+    let currentBtn = null;
+
+    function setCurrentBtn(btn) {
+        if (currentBtn) {
+            currentBtn.removeAttribute('data-current');
+            currentBtn.removeAttribute('data-playing');
+            currentBtn.setAttribute('aria-label', 'Play ' + currentBtn.textContent);
+        }
+        currentBtn = btn;
+        if (btn) {
+            btn.setAttribute('data-current', '');
+            btn.setAttribute('aria-label', 'Pause ' + btn.textContent);
+        }
+    }
+
+    // ── Load a track into the bar ─────────────────────────────────────────────
+
+    function loadTrack(url, name, btn) {
+        setCurrentBtn(btn);
+        barName.textContent = name;
+        barName.setAttribute('aria-label', 'Scroll to post: ' + name);
+        barAudio.src = url;
+        barDownload.href = url;
+        barDownload.setAttribute('download', name);
+        barDownload.setAttribute('aria-label', 'Download ' + name);
+        bar.hidden = false;
+        if (AUTO_PLAY_ON_SELECT) barAudio.play();
+    }
+
+    // ── Bar controls ──────────────────────────────────────────────────────────
+
+    barDownload.addEventListener('click', (e) => {
+        e.preventDefault();
+        const url = barDownload.href;
+        const filename = barDownload.getAttribute('download') || url.split('/').pop();
+        fetch(url)
+            .then((r) => { if (!r.ok) throw new Error(); return r.blob(); })
+            .then((blob) => {
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                setTimeout(() => URL.revokeObjectURL(a.href), 10000);
+            })
+            .catch(() => window.open(url, '_blank'));
+    });
+
+    barName.addEventListener('click', () => {
+        if (currentBtn) currentBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
+
+    barClose.addEventListener('click', () => {
+        barAudio.pause();
+        barAudio.src = '';
+        bar.hidden = true;
+        setCurrentBtn(null);
+    });
+
+    barAudio.addEventListener('play', () => {
+        bar.setAttribute('data-playing', '');
+        if (currentBtn) {
+            currentBtn.setAttribute('data-playing', '');
+            currentBtn.setAttribute('aria-label', 'Pause ' + currentBtn.textContent);
+        }
+    });
+
+    barAudio.addEventListener('pause', () => {
+        bar.removeAttribute('data-playing');
+        if (currentBtn) {
+            currentBtn.removeAttribute('data-playing');
+            currentBtn.setAttribute('aria-label', 'Resume ' + currentBtn.textContent);
+        }
+    });
+
+    barAudio.addEventListener('ended', () => {
+        bar.hidden = true;
+        setCurrentBtn(null);
+    });
+
+    // ── Adjust bar position when Flarum composer is open ─────────────────────
+
+    function adjustBarForComposer() {
+        const composer = document.querySelector('.Composer');
+        if (!composer || composer.classList.contains('Composer--minimized')) {
+            bar.style.bottom = '';
+        } else {
+            bar.style.bottom = composer.offsetHeight + 'px';
+        }
+    }
+
+    new MutationObserver(adjustBarForComposer).observe(document.body, {
+        childList: true,
+        subtree: true,
+        attributes: true,
+        attributeFilter: ['class'],
+    });
+
+    // ── Helpers ───────────────────────────────────────────────────────────────
 
     function getFilename(a) {
         let text = a.textContent.trim();
@@ -22,41 +156,45 @@ app.initializers.add('ekumanov/flarum-ext-inline-audio', () => {
         catch (e) { return url.split('/').pop().split('?')[0]; }
     }
 
+    function makeButton(url, name) {
+        const btn = document.createElement('button');
+        btn.className = 'pc-audio-name';
+        btn.setAttribute('data-audio-url', url);
+        btn.setAttribute('aria-label', 'Play ' + name);
+        btn.textContent = name;
+        btn.addEventListener('click', () => {
+            if (btn === currentBtn) {
+                barAudio.paused ? barAudio.play() : barAudio.pause();
+            } else {
+                loadTrack(url, name, btn);
+            }
+        });
+        return btn;
+    }
+
+    // ── Process post ──────────────────────────────────────────────────────────
+
     function processPost(el) {
-        // Auto-detected audio links → build full collapsible player
+        // Auto-detected audio links → replace <a> with <span><button>
         el.querySelectorAll('a[href]:not([data-ap])').forEach((a) => {
             if (!audioRe.test(a.getAttribute('href'))) return;
             a.setAttribute('data-ap', '1');
 
-            const details = document.createElement('details');
-            details.className = 'pc-audio-wrap';
-
-            const summary = document.createElement('summary');
-            summary.className = 'pc-audio-name';
-            summary.textContent = getFilename(a);
-
-            const au = document.createElement('audio');
-            au.controls = true;
-            au.preload = 'none';
-            au.src = a.href;
-            au.setAttribute('aria-label', summary.textContent);
-
-            details.appendChild(summary);
-            details.appendChild(au);
-            a.parentNode.replaceChild(details, a);
+            const wrap = document.createElement('span');
+            wrap.className = 'pc-audio-wrap';
+            wrap.appendChild(makeButton(a.href, getFilename(a)));
+            a.parentNode.replaceChild(wrap, a);
         });
 
-        // [player] BBCode → PHP already output <details>, just fill in the filename
-        el.querySelectorAll('details.pc-audio-wrap[data-audio-url]:not([data-ap])').forEach((details) => {
-            details.setAttribute('data-ap', '1');
-            const url = details.getAttribute('data-audio-url');
-            const name = filenameFromUrl(url);
-            const summary = details.querySelector('.pc-audio-name');
-            if (summary) summary.textContent = name;
-            const au = details.querySelector('audio');
-            if (au) au.setAttribute('aria-label', name);
+        // [player] BBCode → PHP outputs <span class="pc-audio-wrap" data-audio-url="...">
+        el.querySelectorAll('span.pc-audio-wrap[data-audio-url]:not([data-ap])').forEach((wrap) => {
+            wrap.setAttribute('data-ap', '1');
+            const url = wrap.getAttribute('data-audio-url');
+            wrap.appendChild(makeButton(url, filenameFromUrl(url)));
         });
     }
+
+    // ── MutationObserver ──────────────────────────────────────────────────────
 
     new MutationObserver((muts) => {
         muts.forEach((m) => {
@@ -75,20 +213,4 @@ app.initializers.add('ekumanov/flarum-ext-inline-audio', () => {
             });
         });
     }).observe(document.documentElement, { childList: true, subtree: true });
-
-    document.addEventListener('play', (e) => {
-        if (e.target.tagName !== 'AUDIO') return;
-        document.querySelectorAll('audio').forEach((audio) => {
-            if (audio !== e.target) {
-                audio.pause();
-                audio.closest('.pc-audio-wrap')?.removeAttribute('data-playing');
-            }
-        });
-        e.target.closest('.pc-audio-wrap')?.setAttribute('data-playing', '');
-    }, true);
-
-    document.addEventListener('pause', (e) => {
-        if (e.target.tagName !== 'AUDIO') return;
-        e.target.closest('.pc-audio-wrap')?.removeAttribute('data-playing');
-    }, true);
 });
