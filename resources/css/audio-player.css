@@ -1,19 +1,30 @@
+/* ── Post filename button ────────────────────────────────────────────────── */
+
 .pc-audio-wrap {
     display: block;
     margin: 6px 0;
-    max-width: 420px;
 }
 
 .pc-audio-name {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: none;
+    border: none;
+    cursor: pointer;
     font-size: 0.95em;
-    opacity: 0.7;
-    margin-bottom: 2px;
+    font-family: inherit;
+    color: inherit;
+    padding: 0;
+    text-align: left;
+    max-width: 420px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    cursor: pointer;
-    list-style: none; /* hide default triangle in Firefox */
+    opacity: 0.7;
 }
+
+.pc-audio-name:hover { opacity: 1; }
 
 .pc-audio-name:focus-visible {
     outline: 2px solid currentColor;
@@ -21,47 +32,95 @@
     border-radius: 2px;
 }
 
-/* Hide the default disclosure triangle across browsers */
-.pc-audio-name::-webkit-details-marker {
-    display: none;
-}
-
 @keyframes pc-audio-pulse {
     0%, 100% { opacity: 1; }
     50%       { opacity: 0.3; }
 }
 
-/* not playing (collapsed or expanded) */
+/* Default: circle-play icon */
 .pc-audio-name::before {
     font-family: "Font Awesome 6 Free";
     font-weight: 900;
     content: "\f144"; /* fa-circle-play */
-    margin-right: 6px;
+    flex-shrink: 0;
     font-size: 1em;
     opacity: 0.45;
 }
 
-/* playing (collapsed or expanded) */
-.pc-audio-wrap[data-playing] .pc-audio-name::before {
+/* Current track loaded (playing or paused): switch to circle-pause */
+.pc-audio-name[data-current]::before {
     content: "\f28b"; /* fa-circle-pause */
+    opacity: 0.65;
+}
+
+/* Current track AND actively playing: pulse */
+.pc-audio-name[data-current][data-playing]::before {
     animation: pc-audio-pulse 1.4s ease-in-out infinite;
+    opacity: 1;
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .pc-audio-wrap[data-playing] .pc-audio-name::before {
+    .pc-audio-name[data-current][data-playing]::before {
         animation: none;
         opacity: 1;
     }
 }
 
-.pc-audio-wrap audio {
-    display: block;
-    width: 100%;
-    height: 36px;
-    color-scheme: dark light; /* fallback: OS preference (Flarum 1.8, auto mode) */
-    margin-top: 4px;
+/* ── Global player bar ───────────────────────────────────────────────────── */
+
+.pc-player-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0 14px;
+    height: 52px;
+    background: var(--header-bg, #fff);
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+    box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.12);
 }
 
-/* Flarum 2.0 sets data-theme on <html> when user picks an explicit theme */
-html[data-theme="light"] .pc-audio-wrap audio { color-scheme: light; }
-html[data-theme="dark"]  .pc-audio-wrap audio { color-scheme: dark; }
+.pc-player-bar[hidden] { display: none; }
+
+.pc-player-bar-name {
+    font-size: 0.9em;
+    opacity: 0.75;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex: 0 1 220px;
+    min-width: 0;
+}
+
+.pc-player-bar audio {
+    flex: 1;
+    min-width: 0;
+    height: 36px;
+    color-scheme: dark light; /* fallback: OS preference */
+}
+
+html[data-theme="light"] .pc-player-bar audio { color-scheme: light; }
+html[data-theme="dark"]  .pc-player-bar audio { color-scheme: dark; }
+
+.pc-player-bar-close {
+    flex-shrink: 0;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+    opacity: 0.5;
+    padding: 4px 6px;
+    line-height: 1;
+    color: inherit;
+}
+
+.pc-player-bar-close:hover { opacity: 1; }
+
+.pc-player-bar-close:focus-visible {
+    outline: 2px solid currentColor;
+    border-radius: 2px;
+}
