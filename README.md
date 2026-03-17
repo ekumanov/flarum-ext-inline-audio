@@ -41,6 +41,7 @@ composer require ekumanov/flarum-ext-inline-audio
 ### Update
 ```bash
 composer update ekumanov/flarum-ext-inline-audio
+php flarum cache:clear
 ```
 
 ### Uninstall
