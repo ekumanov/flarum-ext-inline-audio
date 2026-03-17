@@ -10,15 +10,23 @@
 
 A Flarum extension that automatically converts audio file links in posts into inline players, with an optional `[player]` BBCode tag.
 
-![Screenshot](https://raw.githubusercontent.com/ekumanov/flarum-ext-inline-audio/main/docs/player.png)
+Audio links are replaced with a compact, clickable filename. The standard HTML5 player stays hidden until the user clicks the title — keeping posts clean and readable. When expanded, a pulsating icon indicates playback status at a glance.
+
+![Players collapsed, not playing](https://raw.githubusercontent.com/ekumanov/flarum-ext-inline-audio/main/docs/Players%20collapsed%2C%20not%20playing.png)
+
+![One player open and playing](https://raw.githubusercontent.com/ekumanov/flarum-ext-inline-audio/main/docs/One%20player%20open%20and%20playing.png)
 
 ---
 
 ### Features
 
 - Auto-detects links to audio files and replaces them with an inline player — no BBCode required
+- Players are **initially collapsed**: only the filename is shown; clicking it reveals the standard HTML5 player
+- A **circle-play icon** precedes the filename; it switches to a **pulsating circle-pause** icon while audio is playing — regardless of whether the player is expanded or collapsed
 - When a player starts, any other playing audio on the page is paused automatically
-- `[player]URL[/player]` BBCode for explicit embedding
+- `[player]URL[/player]` BBCode for explicit embedding — same collapsible UI as auto-detected links
+- The HTML5 player follows the **Flarum theme** (light/dark) rather than the OS theme
+- Accessible: keyboard navigation, screen reader labels, respects `prefers-reduced-motion`
 - Works seamlessly with [FoF Upload](https://github.com/FriendsOfFlarum/upload) when using a filename-link upload template (see below)
 
 **Supported formats:** `mp3` · `wav` · `ogg` · `flac` · `m4a` · `aac` · `webm` · `mp4` · `mpeg` · `mpg` · `wave`
