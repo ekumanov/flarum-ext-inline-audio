@@ -8,24 +8,30 @@
 [![Latest Stable Version](https://img.shields.io/packagist/v/ekumanov/flarum-ext-inline-audio.svg)](https://packagist.org/packages/ekumanov/flarum-ext-inline-audio)
 [![Total Downloads](https://img.shields.io/packagist/dt/ekumanov/flarum-ext-inline-audio.svg)](https://packagist.org/packages/ekumanov/flarum-ext-inline-audio)
 
-A Flarum extension that automatically converts audio file links in posts into inline players, with an optional `[player]` BBCode tag.
+A Flarum extension that automatically converts audio file links in posts into clickable filenames backed by a shared overlay player bar, with an optional `[player]` BBCode tag.
 
-Audio links are replaced with a compact, clickable filename. The standard HTML5 player stays hidden until the user clicks the title — keeping posts clean and readable. When expanded, a pulsating icon indicates playback status at a glance.
+Audio links are replaced with a compact filename button. Clicking it loads the track into a **fixed player bar** at the bottom of the page — keeping posts clean while giving you a persistent, always-visible player.
 
-![Players collapsed, not playing](https://raw.githubusercontent.com/ekumanov/flarum-ext-inline-audio/main/docs/Players%20collapsed%2C%20not%20playing.png)
+![No player open](https://raw.githubusercontent.com/ekumanov/flarum-ext-inline-audio/main/docs/No%20player%20open.png)
 
-![One player open and playing](https://raw.githubusercontent.com/ekumanov/flarum-ext-inline-audio/main/docs/One%20player%20open%20and%20playing.png)
+![Player open](https://raw.githubusercontent.com/ekumanov/flarum-ext-inline-audio/main/docs/Player%20open.png)
 
 ---
 
 ### Features
 
-- Auto-detects links to audio files and replaces them with an inline player — no BBCode required
-- Players are **initially collapsed**: only the filename is shown; clicking it reveals the standard HTML5 player
-- A **circle-play icon** precedes the filename; it switches to a **pulsating circle-pause** icon while audio is playing — regardless of whether the player is expanded or collapsed
-- When a player starts, any other playing audio on the page is paused automatically
-- `[player]URL[/player]` BBCode for explicit embedding — same collapsible UI as auto-detected links
-- The HTML5 player follows the **Flarum theme** (light/dark) rather than the OS theme
+- Auto-detects links to audio files and replaces them with a clickable filename — no BBCode required
+- Clicking a filename loads it into a **shared overlay player bar** fixed at the bottom of the page
+- Clicking the same filename again **toggles play/pause**
+- Clicking the track name in the bar **scrolls back to the source post**
+- A **circle-play icon** precedes each filename in the post; it switches to a **pulsating circle-pause** while that track is playing
+- When a new track starts, any currently playing audio is **stopped automatically** — one track at a time
+- **Download button** in the player bar; works correctly in all browsers including Safari
+- `[player]URL[/player]` BBCode for explicit embedding — identical behavior to auto-detected links
+- The player bar follows the **Flarum theme** (light/dark) rather than the OS theme
+- On narrow screens the filename expands to fill available width; audio controls shrink to their natural size
+- The bar has a **close button** that stops playback and dismisses the bar
+- Bar rises above the Flarum composer when it is open
 - Accessible: keyboard navigation, screen reader labels, respects `prefers-reduced-motion`
 - Works seamlessly with [FoF Upload](https://github.com/FriendsOfFlarum/upload) when using a filename-link upload template (see below)
 
