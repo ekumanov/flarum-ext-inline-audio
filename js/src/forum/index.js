@@ -11,9 +11,12 @@ app.initializers.add('ekumanov/flarum-ext-inline-audio', () => {
     const bar = document.createElement('div');
     bar.className = 'pc-player-bar';
     bar.hidden = true;
+    bar.setAttribute('role', 'region');
+    bar.setAttribute('aria-label', 'Audio player');
 
     const barName = document.createElement('button');
     barName.className = 'pc-player-bar-name';
+    barName.setAttribute('aria-label', 'Scroll to post');
 
     const barAudio = document.createElement('audio');
     barAudio.controls = true;
@@ -35,9 +38,13 @@ app.initializers.add('ekumanov/flarum-ext-inline-audio', () => {
         if (currentBtn) {
             currentBtn.removeAttribute('data-current');
             currentBtn.removeAttribute('data-playing');
+            currentBtn.setAttribute('aria-label', 'Play ' + currentBtn.textContent);
         }
         currentBtn = btn;
-        if (btn) btn.setAttribute('data-current', '');
+        if (btn) {
+            btn.setAttribute('data-current', '');
+            btn.setAttribute('aria-label', 'Pause ' + btn.textContent);
+        }
     }
 
     // ── Load a track into the bar ─────────────────────────────────────────────
@@ -45,6 +52,7 @@ app.initializers.add('ekumanov/flarum-ext-inline-audio', () => {
     function loadTrack(url, name, btn) {
         setCurrentBtn(btn);
         barName.textContent = name;
+        barName.setAttribute('aria-label', 'Scroll to post: ' + name);
         barAudio.src = url;
         bar.hidden = false;
         if (AUTO_PLAY_ON_SELECT) barAudio.play();
@@ -65,12 +73,18 @@ app.initializers.add('ekumanov/flarum-ext-inline-audio', () => {
 
     barAudio.addEventListener('play', () => {
         bar.setAttribute('data-playing', '');
-        if (currentBtn) currentBtn.setAttribute('data-playing', '');
+        if (currentBtn) {
+            currentBtn.setAttribute('data-playing', '');
+            currentBtn.setAttribute('aria-label', 'Pause ' + currentBtn.textContent);
+        }
     });
 
     barAudio.addEventListener('pause', () => {
         bar.removeAttribute('data-playing');
-        if (currentBtn) currentBtn.removeAttribute('data-playing');
+        if (currentBtn) {
+            currentBtn.removeAttribute('data-playing');
+            currentBtn.setAttribute('aria-label', 'Resume ' + currentBtn.textContent);
+        }
     });
 
     barAudio.addEventListener('ended', () => {

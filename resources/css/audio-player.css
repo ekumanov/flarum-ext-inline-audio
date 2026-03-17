@@ -47,10 +47,10 @@
     opacity: 0.45;
 }
 
-/* Current track loaded (playing or paused): switch to circle-pause */
+/* Current track loaded (playing or paused): switch to circle-pause, always bright */
 .pc-audio-name[data-current]::before {
     content: "\f28b"; /* fa-circle-pause */
-    opacity: 0.65;
+    opacity: 1;
 }
 
 /* Current track AND actively playing: pulse */
