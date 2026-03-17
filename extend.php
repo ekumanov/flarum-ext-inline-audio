@@ -11,7 +11,7 @@ return [
         ->configure(function ($config) {
             $config->BBCodes->addCustom(
                 '[player]{URL}[/player]',
-                '<audio controls preload="none" src="{URL}" style="width:100%;max-width:420px;height:36px;"></audio>'
+                '<details class="pc-audio-wrap" data-audio-url="{URL}"><summary class="pc-audio-name"></summary><audio controls preload="none" src="{URL}"></audio></details>'
             );
         }),
 
