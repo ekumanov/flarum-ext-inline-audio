@@ -67,6 +67,24 @@ app.initializers.add('ekumanov/flarum-ext-inline-audio', () => {
 
     // ── Bar controls ──────────────────────────────────────────────────────────
 
+    barDownload.addEventListener('click', (e) => {
+        e.preventDefault();
+        const url = barDownload.href;
+        const filename = barDownload.getAttribute('download') || url.split('/').pop();
+        fetch(url)
+            .then((r) => { if (!r.ok) throw new Error(); return r.blob(); })
+            .then((blob) => {
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                setTimeout(() => URL.revokeObjectURL(a.href), 10000);
+            })
+            .catch(() => window.open(url, '_blank'));
+    });
+
     barName.addEventListener('click', () => {
         if (currentBtn) currentBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
     });
