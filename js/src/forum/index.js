@@ -22,12 +22,16 @@ app.initializers.add('ekumanov/flarum-ext-inline-audio', () => {
     barAudio.controls = true;
     barAudio.preload = 'none';
 
+    const barDownload = document.createElement('a');
+    barDownload.className = 'pc-player-bar-download';
+    barDownload.setAttribute('aria-label', 'Download');
+
     const barClose = document.createElement('button');
     barClose.className = 'pc-player-bar-close';
     barClose.setAttribute('aria-label', 'Close player');
     barClose.textContent = '✕';
 
-    bar.append(barName, barAudio, barClose);
+    bar.append(barName, barAudio, barDownload, barClose);
     document.body.appendChild(bar);
 
     // ── Track the active filename button ──────────────────────────────────────
@@ -54,6 +58,9 @@ app.initializers.add('ekumanov/flarum-ext-inline-audio', () => {
         barName.textContent = name;
         barName.setAttribute('aria-label', 'Scroll to post: ' + name);
         barAudio.src = url;
+        barDownload.href = url;
+        barDownload.setAttribute('download', name);
+        barDownload.setAttribute('aria-label', 'Download ' + name);
         bar.hidden = false;
         if (AUTO_PLAY_ON_SELECT) barAudio.play();
     }
