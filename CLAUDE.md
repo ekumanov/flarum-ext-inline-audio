@@ -34,3 +34,20 @@ The JS regex `/\.(mp3|wav|ogg|flac|m4a|mpeg|mpg|mp4|wave|aac|webm)(\?[^#]*)?(#.*
 ### FoF Upload integration
 
 Optional — requires manually adding a filename-link upload template in FoF Upload settings with a MIME regex for audio types. Documented in README.md.
+
+## Branch / Docker testing rules
+
+Two branches, two Flarum versions:
+
+| Branch | Flarum | FontAwesome | webpack-config |
+|--------|--------|-------------|----------------|
+| `main` | 2.0+   | FA6 (`"Font Awesome 6 Free"`) | v3 |
+| `1.x`  | 1.8    | FA5 (`"Font Awesome 5 Free"`) | v2 |
+
+**When switching branches for a build, always run `npm ci` (not `npm install`) from the `js/` directory.** `node_modules` is not tracked by git, so after a branch switch the installed `flarum-webpack-config` version may be wrong. `npm ci` reinstalls exactly what the branch's `package-lock.json` specifies. Building with the wrong config version produces `flarum.reg.get(...)` calls in the dist that crash on the incompatible Flarum version.
+
+**When testing in the Flarum 1.8 Docker (`localhost:80`), both extensions mounted in that container must be on their `1.x` branches:**
+- `flarum-ext-inline-audio` → `1.x`
+- `flarum-ext-new-posts-notice` → `1.x`
+
+If either is on `main`, its dist will contain `flarum.reg.get(...)` calls that crash the entire JS bundle in Flarum 1.8, silently breaking all extensions.
