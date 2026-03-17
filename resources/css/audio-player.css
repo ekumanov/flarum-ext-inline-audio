@@ -120,6 +120,12 @@
 html[data-theme="light"] .pc-player-bar audio { color-scheme: light; }
 html[data-theme="dark"]  .pc-player-bar audio { color-scheme: dark; }
 
+/* On narrow screens (no scrubber visible): filename grows, audio shrinks to button only */
+@media (max-width: 640px) {
+    .pc-player-bar-name { flex: 1; }
+    .pc-player-bar audio { flex: 0 0 auto; }
+}
+
 .pc-player-bar-close {
     flex-shrink: 0;
     background: none;
