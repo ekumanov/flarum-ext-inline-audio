@@ -58,6 +58,10 @@
     display: block;
     width: 100%;
     height: 36px;
-    color-scheme: dark light;
+    color-scheme: dark light; /* fallback: OS preference (Flarum 1.8, auto mode) */
     margin-top: 4px;
 }
+
+/* Flarum 2.0 sets data-theme on <html> when user picks an explicit theme */
+html[data-theme="light"] .pc-audio-wrap audio { color-scheme: light; }
+html[data-theme="dark"]  .pc-audio-wrap audio { color-scheme: dark; }
