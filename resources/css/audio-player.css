@@ -87,6 +87,10 @@
 .pc-player-bar[hidden] { display: none; }
 
 .pc-player-bar-name {
+    background: none;
+    border: none;
+    color: inherit;
+    font-family: inherit;
     font-size: 0.9em;
     opacity: 0.75;
     white-space: nowrap;
@@ -94,6 +98,16 @@
     text-overflow: ellipsis;
     flex: 0 1 220px;
     min-width: 0;
+    cursor: pointer;
+    padding: 0;
+    text-align: left;
+}
+
+.pc-player-bar-name:hover { opacity: 1; }
+
+.pc-player-bar-name:focus-visible {
+    outline: 2px solid currentColor;
+    border-radius: 2px;
 }
 
 .pc-player-bar audio {

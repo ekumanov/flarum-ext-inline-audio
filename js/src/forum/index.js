@@ -12,7 +12,7 @@ app.initializers.add('ekumanov/flarum-ext-inline-audio', () => {
     bar.className = 'pc-player-bar';
     bar.hidden = true;
 
-    const barName = document.createElement('span');
+    const barName = document.createElement('button');
     barName.className = 'pc-player-bar-name';
 
     const barAudio = document.createElement('audio');
@@ -51,6 +51,10 @@ app.initializers.add('ekumanov/flarum-ext-inline-audio', () => {
     }
 
     // ── Bar controls ──────────────────────────────────────────────────────────
+
+    barName.addEventListener('click', () => {
+        if (currentBtn) currentBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
 
     barClose.addEventListener('click', () => {
         barAudio.pause();
@@ -119,7 +123,13 @@ app.initializers.add('ekumanov/flarum-ext-inline-audio', () => {
         btn.setAttribute('data-audio-url', url);
         btn.setAttribute('aria-label', 'Play ' + name);
         btn.textContent = name;
-        btn.addEventListener('click', () => loadTrack(url, name, btn));
+        btn.addEventListener('click', () => {
+            if (btn === currentBtn) {
+                barAudio.paused ? barAudio.play() : barAudio.pause();
+            } else {
+                loadTrack(url, name, btn);
+            }
+        });
         return btn;
     }
 
