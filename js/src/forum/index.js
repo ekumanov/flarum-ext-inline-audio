@@ -53,7 +53,13 @@ app.initializers.add('ekumanov/flarum-ext-inline-audio', () => {
 
     // ── Load a track into the bar ─────────────────────────────────────────────
 
+    let downloadVisibilitySet = false;
+
     function loadTrack(url, name, btn) {
+        if (!downloadVisibilitySet) {
+            barDownload.hidden = app.forum.attribute('ekumanov-inline-audio.showDownloadButton') === false;
+            downloadVisibilitySet = true;
+        }
         setCurrentBtn(btn);
         barName.textContent = name;
         barName.setAttribute('aria-label', 'Scroll to post: ' + name);
