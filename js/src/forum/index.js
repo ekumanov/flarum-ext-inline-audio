@@ -1,8 +1,5 @@
 import app from 'flarum/forum/app';
 
-// Set to false to load the track into the bar without auto-starting playback
-const AUTO_PLAY_ON_SELECT = true;
-
 app.initializers.add('ekumanov/flarum-ext-inline-audio', () => {
     const audioRe = /\.(mp3|wav|ogg|flac|m4a|mpeg|mpg|mp4|wave|aac|webm)(\?[^#]*)?(#.*)?$/i;
 
@@ -68,7 +65,7 @@ app.initializers.add('ekumanov/flarum-ext-inline-audio', () => {
         barDownload.setAttribute('download', name);
         barDownload.setAttribute('aria-label', 'Download ' + name);
         bar.hidden = false;
-        if (AUTO_PLAY_ON_SELECT) barAudio.play();
+        if (app.forum.attribute('ekumanov-inline-audio.autoPlay') !== false) barAudio.play();
     }
 
     // ── Download helper (used by bar download button) ─────────────────────────
