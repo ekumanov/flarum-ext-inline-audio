@@ -71,12 +71,9 @@ app.initializers.add('ekumanov/flarum-ext-inline-audio', () => {
         if (AUTO_PLAY_ON_SELECT) barAudio.play();
     }
 
-    // ── Bar controls ──────────────────────────────────────────────────────────
+    // ── Download helper ───────────────────────────────────────────────────────
 
-    barDownload.addEventListener('click', (e) => {
-        e.preventDefault();
-        const url = barDownload.href;
-        const filename = barDownload.getAttribute('download') || url.split('/').pop();
+    function triggerDownload(url, filename) {
         fetch(url)
             .then((r) => { if (!r.ok) throw new Error(); return r.blob(); })
             .then((blob) => {
@@ -89,6 +86,42 @@ app.initializers.add('ekumanov/flarum-ext-inline-audio', () => {
                 setTimeout(() => URL.revokeObjectURL(a.href), 10000);
             })
             .catch(() => window.open(url, '_blank'));
+    }
+
+    // ── Context menu (right-click → Download) on in-post buttons ─────────────
+
+    const ctxMenu = document.createElement('div');
+    ctxMenu.className = 'pc-ctx-menu';
+    ctxMenu.hidden = true;
+    document.body.appendChild(ctxMenu);
+
+    function showCtxMenu(x, y, url, name) {
+        ctxMenu.innerHTML = '';
+        const item = document.createElement('button');
+        item.textContent = 'Download';
+        item.addEventListener('click', () => {
+            ctxMenu.hidden = true;
+            triggerDownload(url, name);
+        });
+        ctxMenu.appendChild(item);
+        ctxMenu.style.left = Math.min(x, window.innerWidth - 150) + 'px';
+        ctxMenu.style.top = Math.min(y, window.innerHeight - 48) + 'px';
+        ctxMenu.hidden = false;
+    }
+
+    document.addEventListener('click', () => { ctxMenu.hidden = true; });
+    document.addEventListener('contextmenu', (e) => {
+        if (!e.target.closest('.pc-ctx-menu')) ctxMenu.hidden = true;
+    });
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') ctxMenu.hidden = true;
+    });
+
+    // ── Bar controls ──────────────────────────────────────────────────────────
+
+    barDownload.addEventListener('click', (e) => {
+        e.preventDefault();
+        triggerDownload(barDownload.href, barDownload.getAttribute('download') || barDownload.href.split('/').pop());
     });
 
     barName.addEventListener('click', () => {
@@ -174,6 +207,10 @@ app.initializers.add('ekumanov/flarum-ext-inline-audio', () => {
             } else {
                 loadTrack(url, name, btn);
             }
+        });
+        btn.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+            showCtxMenu(e.clientX, e.clientY, url, name);
         });
         return btn;
     }
