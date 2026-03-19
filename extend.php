@@ -12,7 +12,9 @@ return [
 
     (new Extend\Settings)
         ->default('ekumanov-inline-audio.showDownloadButton', true)
-        ->serializeToForum('ekumanov-inline-audio.showDownloadButton', 'ekumanov-inline-audio.showDownloadButton', 'boolval'),
+        ->serializeToForum('ekumanov-inline-audio.showDownloadButton', 'ekumanov-inline-audio.showDownloadButton', 'boolval')
+        ->default('ekumanov-inline-audio.showContextMenuDownload', true)
+        ->serializeToForum('ekumanov-inline-audio.showContextMenuDownload', 'ekumanov-inline-audio.showContextMenuDownload', 'boolval'),
 
     (new Extend\Formatter)
         ->configure(function ($config) {

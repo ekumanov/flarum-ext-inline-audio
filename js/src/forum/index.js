@@ -209,6 +209,7 @@ app.initializers.add('ekumanov/flarum-ext-inline-audio', () => {
             }
         });
         btn.addEventListener('contextmenu', (e) => {
+            if (app.forum.attribute('ekumanov-inline-audio.showContextMenuDownload') === false) return;
             e.preventDefault();
             showCtxMenu(e.clientX, e.clientY, url, name);
         });

@@ -4,3 +4,4 @@ ekumanov-inline-audio:
   admin:
     settings:
       show_download_button: Show download button on player bar
+      show_context_menu_download: Allow right-click to download on in-post filename buttons
