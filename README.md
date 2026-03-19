@@ -1,4 +1,4 @@
-> ℹ️ If you've been using [Inline Audio (aka Audio URL to Player)](https://discuss.flarum.org/d/27255-inline-audio-aka-audio-url-to-player), that extension has been abandoned. This is a fresh, actively maintained replacement built for Flarum 1.8.
+> ℹ️ If you've been using [Inline Audio (aka Audio URL to Player)](https://discuss.flarum.org/d/27255-inline-audio-aka-audio-url-to-player), that extension has been abandoned. This is a fresh, actively maintained replacement built for Flarum 2.0+ (and 1.8 via the [`1.x` branch](https://github.com/ekumanov/flarum-ext-inline-audio/tree/1.x)).
 
 ---
 
@@ -8,17 +8,33 @@
 [![Latest Stable Version](https://img.shields.io/packagist/v/ekumanov/flarum-ext-inline-audio.svg)](https://packagist.org/packages/ekumanov/flarum-ext-inline-audio)
 [![Total Downloads](https://img.shields.io/packagist/dt/ekumanov/flarum-ext-inline-audio.svg)](https://packagist.org/packages/ekumanov/flarum-ext-inline-audio)
 
-A Flarum extension that automatically converts audio file links in posts into inline players, with an optional `[player]` BBCode tag.
+A Flarum extension that automatically converts audio file links in posts into clickable filenames backed by a shared overlay player bar, with an optional `[player]` BBCode tag.
 
-![Screenshot](https://raw.githubusercontent.com/ekumanov/flarum-ext-inline-audio/main/docs/player.png)
+Audio links are replaced with a compact filename button. Clicking it loads the track into a **fixed player bar** at the bottom of the page — keeping posts clean while giving you a persistent, always-visible player.
+
+![No player open](https://raw.githubusercontent.com/ekumanov/flarum-ext-inline-audio/main/docs/No%20player%20open.png)
+
+![Player open](https://raw.githubusercontent.com/ekumanov/flarum-ext-inline-audio/main/docs/Player%20open.png)
 
 ---
 
 ### Features
 
-- Auto-detects links to audio files and replaces them with an inline player — no BBCode required
-- When a player starts, any other playing audio on the page is paused automatically
-- `[player]URL[/player]` BBCode for explicit embedding
+- Auto-detects links to audio files and replaces them with a clickable filename — no BBCode required
+- Clicking a filename loads it into a **shared overlay player bar** fixed at the bottom of the page
+- Clicking the same filename again **toggles play/pause**
+- Clicking the track name in the bar **scrolls back to the source post**
+- A **circle-play icon** precedes each filename in the post; it switches to a **pulsating circle-pause** while that track is playing
+- When a new track starts, any currently playing audio is **stopped automatically** — one track at a time
+- **Right-click a filename** to get the browser's native "Save link as" menu (configurable)
+- **Download button** in the player bar; works correctly in all browsers including Safari (opt-in via admin settings)
+- **Auto-play** on first click is configurable
+- `[player]URL[/player]` BBCode for explicit embedding — identical behavior to auto-detected links
+- The player bar follows the **Flarum theme** (light/dark) rather than the OS theme
+- On narrow screens the filename expands to fill available width; audio controls shrink to their natural size
+- The bar has a **close button** that stops playback and dismisses the bar
+- Bar rises above the Flarum composer when it is open
+- Accessible: keyboard navigation, screen reader labels, respects `prefers-reduced-motion`
 - Works seamlessly with [FoF Upload](https://github.com/FriendsOfFlarum/upload) when using a filename-link upload template (see below)
 
 **Supported formats:** `mp3` · `wav` · `ogg` · `flac` · `m4a` · `aac` · `webm` · `mp4` · `mpeg` · `mpg` · `wave`
@@ -33,12 +49,25 @@ composer require ekumanov/flarum-ext-inline-audio
 ### Update
 ```bash
 composer update ekumanov/flarum-ext-inline-audio
+php flarum cache:clear
 ```
 
 ### Uninstall
 ```bash
 composer remove ekumanov/flarum-ext-inline-audio
 ```
+
+---
+
+### Admin Settings
+
+All settings are found under **Extensions → Inline Audio Player** in the admin panel.
+
+| Setting | Default | Description |
+|---------|---------|-------------|
+| Show download button on player bar | Off | Adds a download icon to the overlay player bar |
+| Allow right-click on filename to save | On | Renders the in-post filename as an `<a download>` link, enabling the browser's native "Save link as" on right-click |
+| Start playing immediately when a filename is clicked | On | Auto-plays the track when loaded; disable to require a manual play press |
 
 ---
 
@@ -91,6 +120,15 @@ To restrict the template to audio files only, set a MIME type filter in FoF Uplo
 ```
 ^audio\/(flac|x-flac|mp3|x-mp3|mpg|mpeg|mpeg3|x-mpeg|x-mpeg3|x-mpg|x-mp4a|x-mpegaudio|mp4|vnd.wave|wav|wave|x-wav|x-pn-wav|ogg|x-ogg|x-ogg-flac)
 ```
+
+---
+
+### Compatibility
+
+| Branch | Flarum version |
+|--------|---------------|
+| `main` (this) | Flarum 2.0+ |
+| [`1.x`](https://github.com/ekumanov/flarum-ext-inline-audio/tree/1.x) | Flarum 1.8 |
 
 ---
 
