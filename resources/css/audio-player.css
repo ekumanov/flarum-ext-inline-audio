@@ -15,6 +15,8 @@
     font-size: 0.95em;
     font-family: inherit;
     color: inherit;
+    text-decoration: none !important;
+    border-bottom: none !important;
     padding: 0;
     text-align: left;
     max-width: 420px;
@@ -24,7 +26,7 @@
     opacity: 0.7;
 }
 
-.pc-audio-name:hover { opacity: 1; }
+.pc-audio-name:hover { opacity: 1; text-decoration: none !important; }
 
 .pc-audio-name:focus-visible {
     outline: 2px solid currentColor;
@@ -167,3 +169,4 @@ html[data-theme="dark"]  .pc-player-bar audio { color-scheme: dark; }
     outline: 2px solid currentColor;
     border-radius: 2px;
 }
+

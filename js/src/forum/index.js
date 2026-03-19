@@ -1,8 +1,5 @@
 import app from 'flarum/forum/app';
 
-// Set to false to load the track into the bar without auto-starting playback
-const AUTO_PLAY_ON_SELECT = true;
-
 app.initializers.add('ekumanov/flarum-ext-inline-audio', () => {
     const audioRe = /\.(mp3|wav|ogg|flac|m4a|mpeg|mpg|mp4|wave|aac|webm)(\?[^#]*)?(#.*)?$/i;
 
@@ -68,15 +65,12 @@ app.initializers.add('ekumanov/flarum-ext-inline-audio', () => {
         barDownload.setAttribute('download', name);
         barDownload.setAttribute('aria-label', 'Download ' + name);
         bar.hidden = false;
-        if (AUTO_PLAY_ON_SELECT) barAudio.play();
+        if (app.forum.attribute('ekumanov-inline-audio.autoPlay') !== false) barAudio.play();
     }
 
-    // ── Bar controls ──────────────────────────────────────────────────────────
+    // ── Download helper (used by bar download button) ─────────────────────────
 
-    barDownload.addEventListener('click', (e) => {
-        e.preventDefault();
-        const url = barDownload.href;
-        const filename = barDownload.getAttribute('download') || url.split('/').pop();
+    function triggerDownload(url, filename) {
         fetch(url)
             .then((r) => { if (!r.ok) throw new Error(); return r.blob(); })
             .then((blob) => {
@@ -89,6 +83,13 @@ app.initializers.add('ekumanov/flarum-ext-inline-audio', () => {
                 setTimeout(() => URL.revokeObjectURL(a.href), 10000);
             })
             .catch(() => window.open(url, '_blank'));
+    }
+
+    // ── Bar controls ──────────────────────────────────────────────────────────
+
+    barDownload.addEventListener('click', (e) => {
+        e.preventDefault();
+        triggerDownload(barDownload.href, barDownload.getAttribute('download') || barDownload.href.split('/').pop());
     });
 
     barName.addEventListener('click', () => {
@@ -163,12 +164,19 @@ app.initializers.add('ekumanov/flarum-ext-inline-audio', () => {
     }
 
     function makeButton(url, name) {
-        const btn = document.createElement('button');
+        const useLink = app.forum.attribute('ekumanov-inline-audio.showRightClickDownload') !== false;
+        const btn = document.createElement(useLink ? 'a' : 'button');
         btn.className = 'pc-audio-name';
         btn.setAttribute('data-audio-url', url);
+        btn.setAttribute('data-ap', '1');
         btn.setAttribute('aria-label', 'Play ' + name);
         btn.textContent = name;
-        btn.addEventListener('click', () => {
+        if (useLink) {
+            btn.href = url;
+            btn.setAttribute('download', name);
+        }
+        btn.addEventListener('click', (e) => {
+            if (useLink) e.preventDefault();
             if (btn === currentBtn) {
                 barAudio.paused ? barAudio.play() : barAudio.pause();
             } else {
