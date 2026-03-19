@@ -4,3 +4,4 @@ ekumanov-inline-audio:
   admin:
     settings:
       show_download_button: Show download button on player bar
+      show_right_click_download: Allow right-click on filename to save the file

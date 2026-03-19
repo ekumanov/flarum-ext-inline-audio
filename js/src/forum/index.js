@@ -167,16 +167,19 @@ app.initializers.add('ekumanov/flarum-ext-inline-audio', () => {
     }
 
     function makeButton(url, name) {
-        const btn = document.createElement('a');
+        const useLink = app.forum.attribute('ekumanov-inline-audio.showRightClickDownload') !== false;
+        const btn = document.createElement(useLink ? 'a' : 'button');
         btn.className = 'pc-audio-name';
-        btn.href = url;
-        btn.setAttribute('download', name);
         btn.setAttribute('data-audio-url', url);
         btn.setAttribute('data-ap', '1');
         btn.setAttribute('aria-label', 'Play ' + name);
         btn.textContent = name;
+        if (useLink) {
+            btn.href = url;
+            btn.setAttribute('download', name);
+        }
         btn.addEventListener('click', (e) => {
-            e.preventDefault();
+            if (useLink) e.preventDefault();
             if (btn === currentBtn) {
                 barAudio.paused ? barAudio.play() : barAudio.pause();
             } else {

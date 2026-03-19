@@ -11,8 +11,10 @@ return [
         ->js(__DIR__ . '/js/dist/admin.js'),
 
     (new Extend\Settings)
-        ->default('ekumanov-inline-audio.showDownloadButton', true)
-        ->serializeToForum('ekumanov-inline-audio.showDownloadButton', 'ekumanov-inline-audio.showDownloadButton', 'boolval'),
+        ->default('ekumanov-inline-audio.showDownloadButton', false)
+        ->serializeToForum('ekumanov-inline-audio.showDownloadButton', 'ekumanov-inline-audio.showDownloadButton', 'boolval')
+        ->default('ekumanov-inline-audio.showRightClickDownload', true)
+        ->serializeToForum('ekumanov-inline-audio.showRightClickDownload', 'ekumanov-inline-audio.showRightClickDownload', 'boolval'),
 
     (new Extend\Formatter)
         ->configure(function ($config) {

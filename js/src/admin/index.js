@@ -7,5 +7,10 @@ app.initializers.add('ekumanov/flarum-ext-inline-audio', () => {
             setting: 'ekumanov-inline-audio.showDownloadButton',
             type: 'boolean',
             label: app.translator.trans('ekumanov-inline-audio.admin.settings.show_download_button'),
+        })
+        .registerSetting({
+            setting: 'ekumanov-inline-audio.showRightClickDownload',
+            type: 'boolean',
+            label: app.translator.trans('ekumanov-inline-audio.admin.settings.show_right_click_download'),
         });
 });
