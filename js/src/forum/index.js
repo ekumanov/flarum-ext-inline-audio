@@ -111,7 +111,7 @@ app.initializers.add('ekumanov/flarum-ext-inline-audio', () => {
 
     document.addEventListener('click', () => { ctxMenu.hidden = true; });
     document.addEventListener('contextmenu', (e) => {
-        if (!e.target.closest('.pc-ctx-menu')) ctxMenu.hidden = true;
+        if (!e.target.closest('.pc-ctx-menu') && !e.target.closest('.pc-audio-name')) ctxMenu.hidden = true;
     });
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') ctxMenu.hidden = true;
