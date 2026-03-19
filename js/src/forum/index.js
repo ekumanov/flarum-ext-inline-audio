@@ -71,7 +71,7 @@ app.initializers.add('ekumanov/flarum-ext-inline-audio', () => {
         if (AUTO_PLAY_ON_SELECT) barAudio.play();
     }
 
-    // ── Download helper ───────────────────────────────────────────────────────
+    // ── Download helper (used by bar download button) ─────────────────────────
 
     function triggerDownload(url, filename) {
         fetch(url)
@@ -87,35 +87,6 @@ app.initializers.add('ekumanov/flarum-ext-inline-audio', () => {
             })
             .catch(() => window.open(url, '_blank'));
     }
-
-    // ── Context menu (right-click → Download) on in-post buttons ─────────────
-
-    const ctxMenu = document.createElement('div');
-    ctxMenu.className = 'pc-ctx-menu';
-    ctxMenu.hidden = true;
-    document.body.appendChild(ctxMenu);
-
-    function showCtxMenu(x, y, url, name) {
-        ctxMenu.innerHTML = '';
-        const item = document.createElement('button');
-        item.textContent = 'Download';
-        item.addEventListener('click', () => {
-            ctxMenu.hidden = true;
-            triggerDownload(url, name);
-        });
-        ctxMenu.appendChild(item);
-        ctxMenu.style.left = Math.min(x, window.innerWidth - 150) + 'px';
-        ctxMenu.style.top = Math.min(y, window.innerHeight - 48) + 'px';
-        ctxMenu.hidden = false;
-    }
-
-    document.addEventListener('click', () => { ctxMenu.hidden = true; });
-    document.addEventListener('contextmenu', (e) => {
-        if (!e.target.closest('.pc-ctx-menu') && !e.target.closest('.pc-audio-name')) ctxMenu.hidden = true;
-    });
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') ctxMenu.hidden = true;
-    });
 
     // ── Bar controls ──────────────────────────────────────────────────────────
 
@@ -196,22 +167,21 @@ app.initializers.add('ekumanov/flarum-ext-inline-audio', () => {
     }
 
     function makeButton(url, name) {
-        const btn = document.createElement('button');
+        const btn = document.createElement('a');
         btn.className = 'pc-audio-name';
+        btn.href = url;
+        btn.setAttribute('download', name);
         btn.setAttribute('data-audio-url', url);
+        btn.setAttribute('data-ap', '1');
         btn.setAttribute('aria-label', 'Play ' + name);
         btn.textContent = name;
-        btn.addEventListener('click', () => {
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
             if (btn === currentBtn) {
                 barAudio.paused ? barAudio.play() : barAudio.pause();
             } else {
                 loadTrack(url, name, btn);
             }
-        });
-        btn.addEventListener('contextmenu', (e) => {
-            if (app.forum.attribute('ekumanov-inline-audio.showContextMenuDownload') === false) return;
-            e.preventDefault();
-            showCtxMenu(e.clientX, e.clientY, url, name);
         });
         return btn;
     }

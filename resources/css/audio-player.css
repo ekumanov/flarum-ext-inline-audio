@@ -15,6 +15,7 @@
     font-size: 0.95em;
     font-family: inherit;
     color: inherit;
+    text-decoration: none;
     padding: 0;
     text-align: left;
     max-width: 420px;
@@ -168,35 +169,3 @@ html[data-theme="dark"]  .pc-player-bar audio { color-scheme: dark; }
     border-radius: 2px;
 }
 
-/* ── Right-click context menu ────────────────────────────────────────────── */
-
-.pc-ctx-menu {
-    position: fixed;
-    z-index: 10000;
-    background: var(--body-bg, #fff);
-    border: 1px solid rgba(0, 0, 0, 0.15);
-    border-radius: 4px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-    padding: 4px 0;
-    min-width: 120px;
-}
-
-.pc-ctx-menu[hidden] { display: none; }
-
-.pc-ctx-menu button {
-    display: block;
-    width: 100%;
-    padding: 6px 14px;
-    background: none;
-    border: none;
-    text-align: left;
-    cursor: pointer;
-    font-family: inherit;
-    font-size: 0.9em;
-    color: inherit;
-    white-space: nowrap;
-}
-
-.pc-ctx-menu button:hover {
-    background: var(--control-bg, rgba(0, 0, 0, 0.07));
-}
