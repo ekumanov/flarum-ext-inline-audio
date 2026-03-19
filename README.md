@@ -26,7 +26,9 @@ Audio links are replaced with a compact filename button. Clicking it loads the t
 - Clicking the track name in the bar **scrolls back to the source post**
 - A **circle-play icon** precedes each filename in the post; it switches to a **pulsating circle-pause** while that track is playing
 - When a new track starts, any currently playing audio is **stopped automatically** — one track at a time
-- **Download button** in the player bar; works correctly in all browsers including Safari
+- **Right-click a filename** to get the browser's native "Save link as" menu (configurable)
+- **Download button** in the player bar; works correctly in all browsers including Safari (opt-in via admin settings)
+- **Auto-play** on first click is configurable
 - `[player]URL[/player]` BBCode for explicit embedding — identical behavior to auto-detected links
 - The player bar follows the **Flarum theme** (light/dark) rather than the OS theme
 - On narrow screens the filename expands to fill available width; audio controls shrink to their natural size
@@ -54,6 +56,18 @@ php flarum cache:clear
 ```bash
 composer remove ekumanov/flarum-ext-inline-audio
 ```
+
+---
+
+### Admin Settings
+
+All settings are found under **Extensions → Inline Audio Player** in the admin panel.
+
+| Setting | Default | Description |
+|---------|---------|-------------|
+| Show download button on player bar | Off | Adds a download icon to the overlay player bar |
+| Allow right-click on filename to save | On | Renders the in-post filename as an `<a download>` link, enabling the browser's native "Save link as" on right-click |
+| Start playing immediately when a filename is clicked | On | Auto-plays the track when loaded; disable to require a manual play press |
 
 ---
 
