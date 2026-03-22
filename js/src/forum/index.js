@@ -170,7 +170,10 @@ app.initializers.add('ekumanov/flarum-ext-inline-audio', () => {
         btn.setAttribute('data-audio-url', url);
         btn.setAttribute('data-ap', '1');
         btn.setAttribute('aria-label', 'Play ' + name);
-        btn.textContent = name;
+        const nameSpan = document.createElement('span');
+        nameSpan.className = 'pc-audio-name-text';
+        nameSpan.textContent = name;
+        btn.appendChild(nameSpan);
         if (useLink) {
             btn.href = url;
             btn.setAttribute('download', name);
