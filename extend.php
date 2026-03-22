@@ -16,7 +16,9 @@ return [
         ->default('ekumanov-inline-audio.showRightClickDownload', true)
         ->serializeToForum('ekumanov-inline-audio.showRightClickDownload', 'ekumanov-inline-audio.showRightClickDownload', 'boolval')
         ->default('ekumanov-inline-audio.autoPlay', true)
-        ->serializeToForum('ekumanov-inline-audio.autoPlay', 'ekumanov-inline-audio.autoPlay', 'boolval'),
+        ->serializeToForum('ekumanov-inline-audio.autoPlay', 'ekumanov-inline-audio.autoPlay', 'boolval')
+        ->default('ekumanov-inline-audio.stripUploadPrefix', true)
+        ->serializeToForum('ekumanov-inline-audio.stripUploadPrefix', 'ekumanov-inline-audio.stripUploadPrefix', 'boolval'),
 
     (new Extend\Formatter)
         ->configure(function ($config) {
