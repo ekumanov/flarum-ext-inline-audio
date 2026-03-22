@@ -19,11 +19,15 @@
     border-bottom: none !important;
     padding: 0;
     text-align: left;
-    max-width: 420px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    max-width: 100%;
     opacity: 0.7;
+}
+
+.pc-audio-name-text {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    min-width: 0;
 }
 
 .pc-audio-name:hover { opacity: 1; text-decoration: none !important; }
