@@ -68,6 +68,7 @@ All settings are found under **Extensions → Inline Audio Player** in the admin
 | Show download button on player bar | Off | Adds a download icon to the overlay player bar |
 | Allow right-click on filename to save | On | Renders the in-post filename as an `<a download>` link, enabling the browser's native "Save link as" on right-click |
 | Start playing immediately when a filename is clicked | On | Auto-plays the track when loaded; disable to require a manual play press |
+| Hide numeric prefix from uploaded filenames | On | Strips the `timestamp-userId-` prefix that FoF Upload adds (e.g. `1774205518-685373-song.mp3` → `song.mp3`) |
 
 ---
 
