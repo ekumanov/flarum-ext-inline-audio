@@ -17,5 +17,10 @@ app.initializers.add('ekumanov/flarum-ext-inline-audio', () => {
             setting: 'ekumanov-inline-audio.autoPlay',
             type: 'boolean',
             label: app.translator.trans('ekumanov-inline-audio.admin.settings.auto_play'),
+        })
+        .registerSetting({
+            setting: 'ekumanov-inline-audio.stripUploadPrefix',
+            type: 'boolean',
+            label: app.translator.trans('ekumanov-inline-audio.admin.settings.strip_upload_prefix'),
         });
 });

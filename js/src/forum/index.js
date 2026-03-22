@@ -163,7 +163,13 @@ app.initializers.add('ekumanov/flarum-ext-inline-audio', () => {
         catch (e) { return url.split('/').pop().split('?')[0]; }
     }
 
+    function stripUploadPrefix(name) {
+        if (app.forum.attribute('ekumanov-inline-audio.stripUploadPrefix') === false) return name;
+        return name.replace(/^\d+-\d+-/, '');
+    }
+
     function makeButton(url, name) {
+        name = stripUploadPrefix(name);
         const useLink = app.forum.attribute('ekumanov-inline-audio.showRightClickDownload') !== false;
         const btn = document.createElement(useLink ? 'a' : 'button');
         btn.className = 'pc-audio-name';
