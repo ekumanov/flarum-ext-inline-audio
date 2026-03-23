@@ -45,7 +45,7 @@
 
 /* Default: circle-play icon */
 .pc-audio-name::before {
-    font-family: "Font Awesome 6 Free";
+    font-family: "Font Awesome 7 Free", "Font Awesome 6 Free";
     font-weight: 900;
     content: "\f144"; /* fa-circle-play */
     flex-shrink: 0;
@@ -142,7 +142,7 @@ html[data-theme="dark"]  .pc-player-bar audio { color-scheme: dark; }
 }
 
 .pc-player-bar-download::before {
-    font-family: "Font Awesome 6 Free";
+    font-family: "Font Awesome 7 Free", "Font Awesome 6 Free";
     font-weight: 900;
     content: "\f019"; /* fa-download */
     font-size: 1rem;
