@@ -126,6 +126,13 @@
 html[data-theme="light"] .pc-player-bar audio { color-scheme: light; }
 html[data-theme="dark"]  .pc-player-bar audio { color-scheme: dark; }
 
+/* Respect Flarum's pinned discussion-list pane on wide screens.
+   The player bar lives on <body>, not inside .App, so we use :has()
+   to detect the pinned state on a sibling element. */
+@media (min-width: 1100px) {
+    body:has(.App.hasPane.panePinned) .pc-player-bar { left: var(--pane-width); }
+}
+
 /* On narrow screens (no scrubber visible): filename grows, audio shrinks to button only */
 @media (max-width: 640px) {
     .pc-player-bar-name { flex: 1; }
