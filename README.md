@@ -135,5 +135,6 @@ To restrict the template to audio files only, set a MIME type filter in FoF Uplo
 
 ### Links
 
+* [Discuss](https://discuss.flarum.org/d/38915-inline-audio-player)
 * [GitHub](https://github.com/ekumanov/flarum-ext-inline-audio)
 * [Packagist](https://packagist.org/packages/ekumanov/flarum-ext-inline-audio)
