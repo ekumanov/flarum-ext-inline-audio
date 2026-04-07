@@ -65,7 +65,31 @@ app.initializers.add('ekumanov/flarum-ext-inline-audio', () => {
         barDownload.setAttribute('download', name);
         barDownload.setAttribute('aria-label', 'Download ' + name);
         bar.hidden = false;
+        updateMediaSession(name);
         if (app.forum.attribute('ekumanov-inline-audio.autoPlay') !== false) barAudio.play();
+    }
+
+    // ── Media Session API (lock screen / OS media controls) ──────────────────
+
+    function updateMediaSession(name) {
+        if (!('mediaSession' in navigator)) return;
+        try {
+            navigator.mediaSession.metadata = new MediaMetadata({ title: name });
+        } catch (e) { /* ignore */ }
+    }
+
+    function clearMediaSession() {
+        if (!('mediaSession' in navigator)) return;
+        try { navigator.mediaSession.metadata = null; } catch (e) { /* ignore */ }
+    }
+
+    if ('mediaSession' in navigator) {
+        const safeSet = (action, handler) => {
+            try { navigator.mediaSession.setActionHandler(action, handler); } catch (e) { /* unsupported action */ }
+        };
+        safeSet('play', () => barAudio.play());
+        safeSet('pause', () => barAudio.pause());
+        safeSet('stop', () => { barAudio.pause(); barAudio.currentTime = 0; });
     }
 
     // ── Download helper (used by bar download button) ─────────────────────────
@@ -101,6 +125,7 @@ app.initializers.add('ekumanov/flarum-ext-inline-audio', () => {
         barAudio.src = '';
         bar.hidden = true;
         setCurrentBtn(null);
+        clearMediaSession();
     });
 
     barAudio.addEventListener('play', () => {
