@@ -188,6 +188,22 @@ app.initializers.add('ekumanov/flarum-ext-inline-audio', () => {
         catch (e) { return url.split('/').pop().split('?')[0]; }
     }
 
+    function parseStartTime(s) {
+        if (!s) return 0;
+        const parts = s.split(':');
+        if (parts.some((p) => !/^\d+$/.test(p))) return 0;
+        const nums = parts.map(Number);
+        if (nums.length === 1) return nums[0];
+        if (nums.length === 2) return nums[0] * 60 + nums[1];
+        if (nums.length === 3) return nums[0] * 3600 + nums[1] * 60 + nums[2];
+        return 0;
+    }
+
+    function applyStartFragment(url, seconds) {
+        if (!seconds) return url;
+        return url.replace(/#.*$/, '') + '#t=' + seconds;
+    }
+
     function stripUploadPrefix(name) {
         if (app.forum.attribute('ekumanov-inline-audio.stripUploadPrefix') === false) return name;
         return name.replace(/^\d+-\d+-/, '');
@@ -239,7 +255,8 @@ app.initializers.add('ekumanov/flarum-ext-inline-audio', () => {
         el.querySelectorAll('span.pc-audio-wrap[data-audio-url]:not([data-ap])').forEach((wrap) => {
             wrap.setAttribute('data-ap', '1');
             const url = wrap.getAttribute('data-audio-url');
-            wrap.appendChild(makeButton(url, filenameFromUrl(url)));
+            const start = parseStartTime(wrap.getAttribute('data-start'));
+            wrap.appendChild(makeButton(applyStartFragment(url, start), filenameFromUrl(url)));
         });
     }
 

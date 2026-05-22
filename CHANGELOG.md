@@ -1,5 +1,10 @@
 # Changelog
 
+## [2.9.0] - 2026-05-22
+
+### Added
+- Optional `start=` attribute on the `[player]` BBCode tag for seeking on first play. Accepts seconds (`83`), `mm:ss` (`1:23`), or `h:mm:ss` (`0:01:23`). Implemented via the W3C media-fragment `#t=` URL syntax.
+
 ## [2.0.0-beta.1] - 2026-03-17
 
 ### Changed
