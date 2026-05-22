@@ -1,5 +1,7 @@
 > ℹ️ If you've been using [Inline Audio (aka Audio URL to Player)](https://discuss.flarum.org/d/27255-inline-audio-aka-audio-url-to-player), that extension has been abandoned. This is a fresh, actively maintained replacement built for Flarum 2.0+ (and 1.8 via the [`1.x` branch](https://github.com/ekumanov/flarum-ext-inline-audio/tree/1.x)).
 
+> ℹ️ Developed with the help of [Claude Code](https://claude.com/claude-code) (Anthropic) — disclosed per Flarum Discuss guidelines on AI-assisted extension development.
+
 ---
 
 ## Inline Audio Player
@@ -75,6 +77,11 @@ All settings are found under **Extensions → Inline Audio Player** in the admin
 ### BBCode
 ```
 [player]https://example.com/audio/track.mp3[/player]
+```
+
+Optional `start=` attribute jumps to a given offset on first play. Accepts seconds (`83`), `mm:ss` (`1:23`), or `h:mm:ss` (`0:01:23`):
+```
+[player start=1:23]https://example.com/audio/track.mp3[/player]
 ```
 
 ---

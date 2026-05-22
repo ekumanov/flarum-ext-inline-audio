@@ -23,8 +23,8 @@ return [
     (new Extend\Formatter)
         ->configure(function ($config) {
             $config->BBCodes->addCustom(
-                '[player]{URL}[/player]',
-                '<span class="pc-audio-wrap" data-audio-url="{URL}"></span>'
+                '[player start={REGEXP=/^\d+(:\d\d)?(:\d\d)?$/;optional}]{URL}[/player]',
+                '<span class="pc-audio-wrap" data-audio-url="{URL}" data-start="{@start}"></span>'
             );
         }),
 
