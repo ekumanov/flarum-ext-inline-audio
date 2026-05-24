@@ -79,10 +79,23 @@ All settings are found under **Extensions → Inline Audio Player** in the admin
 [player]https://example.com/audio/track.mp3[/player]
 ```
 
-Optional `start=` attribute jumps to a given offset on first play. Accepts seconds (`83`), `mm:ss` (`1:23`), or `h:mm:ss` (`0:01:23`):
+Two optional attributes can be combined:
+
+- **`title="..."`** — display name for the player; replaces the URL-derived filename in the button, the player bar, and the OS lock-screen metadata. Quotes are required when the title contains spaces. Falls back to the filename when omitted or empty.
+- **`start=...`** — jump to a given offset on first play. Accepts seconds (`83`), `mm:ss` (`1:23`), or `h:mm:ss` (`0:01:23`).
+
 ```
-[player start=1:23]https://example.com/audio/track.mp3[/player]
+[player title="Beethoven — Sonata 14, mvt. 1" start=1:23]https://example.com/audio/track.mp3[/player]
 ```
+
+### Markdown equivalent
+
+The same two effects are available without BBCode by using a Markdown link with an optional URL fragment:
+
+- **Title** — Markdown link text becomes the display name: `[Beethoven — Sonata 14, mvt. 1](https://example.com/audio/track.mp3)`
+- **Offset** — append a W3C media fragment to the URL: `[…](https://example.com/audio/track.mp3#t=83)` — note this is **seconds only**, since the browser parses it natively. Use the BBCode form if you want `mm:ss`.
+
+Both forms render to the same player bar and produce identical Media Session metadata. Use whichever reads better in context.
 
 ---
 
