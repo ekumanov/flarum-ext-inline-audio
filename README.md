@@ -76,16 +76,34 @@ All settings are found under **Extensions → Inline Audio Player** in the admin
 
 ### Embedding audio — three ways
 
-The extension picks up audio links from three sources, all rendering into the same player bar. Pick whichever reads cleanest in your post:
+The extension picks up audio links from three sources, all rendering into the same player bar. Pick whichever reads cleanest in your post.
 
-| Goal | Raw URL | Markdown link | BBCode |
+**Quick capability matrix**
+
+| Feature | Raw URL | Markdown | BBCode |
 |---|---|---|---|
-| Filename, no offset | `https://ex.com/song.mp3` | n/a (needs link text) | `[player]https://ex.com/song.mp3[/player]` |
-| Title, no offset | not possible | `[My Song](https://ex.com/song.mp3)` | `[player title="My Song"]https://ex.com/song.mp3[/player]` |
-| Filename + offset | `https://ex.com/song.mp3#t=83` ⓘ | use raw URL instead | `[player start=1:23]https://ex.com/song.mp3[/player]` |
-| Title + offset | not possible | `[My Song](https://ex.com/song.mp3#t=83)` ⓘ | `[player title="My Song" start=1:23]https://ex.com/song.mp3[/player]` |
+| Display name | filename | ✓ link text | ✓ `title="…"` |
+| Offset | ✓ `#t=N` (s) | ✓ `#t=N` (s) | ✓ `start=` (s / mm:ss / h:mm:ss) |
 
-ⓘ = via W3C media fragment; the browser parses `#t=N` natively, **seconds only**. Use BBCode `start=` if you want `mm:ss` or `h:mm:ss` (`83` ↔ `1:23` ↔ `0:01:23`).
+**Raw URL** — just paste the link. The filename is shown. Append `#t=N` for a seconds-based offset:
+```
+https://ex.com/song.mp3
+https://ex.com/song.mp3#t=83
+```
+
+**Markdown link** — link text becomes the title:
+```
+[My Song](https://ex.com/song.mp3)
+[My Song](https://ex.com/song.mp3#t=83)
+```
+
+**BBCode** — explicit `title=` and `start=` attributes, with friendlier offset formats:
+```
+[player]https://ex.com/song.mp3[/player]
+[player title="My Song"]https://ex.com/song.mp3[/player]
+[player start=1:23]https://ex.com/song.mp3[/player]
+[player title="My Song" start=1:23]https://ex.com/song.mp3[/player]
+```
 
 **When no title is provided** — raw URL or `[player]` without `title=` — the player derives the display name from the last segment of the URL, decoded. E.g. `https://ex.com/audio/1234-985-some-song.mp3` → `1234-985-some-song.mp3`. The "Hide numeric prefix from uploaded filenames" admin setting (on by default) further strips the FoF Upload `timestamp-userId-` prefix, leaving `some-song.mp3`.
 
