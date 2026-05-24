@@ -256,7 +256,9 @@ app.initializers.add('ekumanov/flarum-ext-inline-audio', () => {
             wrap.setAttribute('data-ap', '1');
             const url = wrap.getAttribute('data-audio-url');
             const start = parseStartTime(wrap.getAttribute('data-start'));
-            wrap.appendChild(makeButton(applyStartFragment(url, start), filenameFromUrl(url)));
+            const title = (wrap.getAttribute('data-title') || '').trim();
+            const displayName = title || filenameFromUrl(url);
+            wrap.appendChild(makeButton(applyStartFragment(url, start), displayName));
         });
     }
 

@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.10.0] - 2026-05-24
+
+### Added
+- Optional `title="..."` attribute on the `[player]` BBCode tag. Replaces the URL-derived filename as the display name in the post button, the player bar, and the OS lock-screen / Media Session metadata. Falls back to the filename when omitted or empty.
+- README documents the Markdown-vs-BBCode equivalence: link text already works as a title in `[Text](url.mp3)` form, and `#t=N` URL fragments seek natively.
+
 ## [1.9.0] - 2026-05-22
 
 ### Added
