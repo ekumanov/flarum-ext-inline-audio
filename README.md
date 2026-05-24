@@ -74,28 +74,27 @@ All settings are found under **Extensions → Inline Audio Player** in the admin
 
 ---
 
-### BBCode
-```
-[player]https://example.com/audio/track.mp3[/player]
-```
+### Embedding audio — three ways
 
-Two optional attributes can be combined:
+The extension picks up audio links from three sources, all rendering into the same player bar. Pick whichever reads cleanest in your post:
 
-- **`title="..."`** — display name for the player; replaces the URL-derived filename in the button, the player bar, and the OS lock-screen metadata. Quotes are required when the title contains spaces. Falls back to the filename when omitted or empty.
-- **`start=...`** — jump to a given offset on first play. Accepts seconds (`83`), `mm:ss` (`1:23`), or `h:mm:ss` (`0:01:23`).
+| Goal | Raw URL | Markdown link | BBCode |
+|---|---|---|---|
+| Filename, no offset | `https://ex.com/song.mp3` | n/a (needs link text) | `[player]https://ex.com/song.mp3[/player]` |
+| Title, no offset | not possible | `[My Song](https://ex.com/song.mp3)` | `[player title="My Song"]https://ex.com/song.mp3[/player]` |
+| Filename + offset | `https://ex.com/song.mp3#t=83` ⓘ | use raw URL instead | `[player start=1:23]https://ex.com/song.mp3[/player]` |
+| Title + offset | not possible | `[My Song](https://ex.com/song.mp3#t=83)` ⓘ | `[player title="My Song" start=1:23]https://ex.com/song.mp3[/player]` |
 
-```
-[player title="Beethoven — Sonata 14, mvt. 1" start=1:23]https://example.com/audio/track.mp3[/player]
-```
+ⓘ = via W3C media fragment; the browser parses `#t=N` natively, **seconds only**. Use BBCode `start=` if you want `mm:ss` or `h:mm:ss` (`83` ↔ `1:23` ↔ `0:01:23`).
 
-### Markdown equivalent
+**When no title is provided** — raw URL or `[player]` without `title=` — the player derives the display name from the last segment of the URL, decoded. E.g. `https://ex.com/audio/1234-985-some-song.mp3` → `1234-985-some-song.mp3`. The "Hide numeric prefix from uploaded filenames" admin setting (on by default) further strips the FoF Upload `timestamp-userId-` prefix, leaving `some-song.mp3`.
 
-The same two effects are available without BBCode by using a Markdown link with an optional URL fragment:
+The title — whether typed as Markdown link text or BBCode `title=` — is used in the in-post button, the player bar, **and the OS lock-screen / Media Session metadata** (so headphones, car displays, watch widgets, and the macOS Now Playing widget all show it).
 
-- **Title** — Markdown link text becomes the display name: `[Beethoven — Sonata 14, mvt. 1](https://example.com/audio/track.mp3)`
-- **Offset** — append a W3C media fragment to the URL: `[…](https://example.com/audio/track.mp3#t=83)` — note this is **seconds only**, since the browser parses it natively. Use the BBCode form if you want `mm:ss`.
+**About quotes in BBCode**
 
-Both forms render to the same player bar and produce identical Media Session metadata. Use whichever reads better in context.
+- `title=` needs quotes only when the value contains spaces (`title="My Song"`). Single-word titles can stay unquoted (`title=Beethoven`).
+- `start=` never **needs** quotes, but accepts them — `start=0:40`, `start="0:40"`, and `start='0:40'` are all equivalent. The parser strips quotes before validating, so adding them by reflex (because `title=` needs them) is harmless.
 
 ---
 
