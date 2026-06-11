@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.10.2] - 2026-06-12
+
+### Fixed
+- Removed a dead `Composer--minimized` check from the composer-position logic: neither Flarum 1.8 nor 2.x ever renders that class (both use `minimized`), so the branch never executed. Behavior is unchanged on purpose — the player bar keeps sitting above the minimized composer strip rather than dropping behind it.
+- The bar could park at a mid-animation offset after minimizing/restoring the composer: Flarum animates composer height via style mutations, which the class-filtered `MutationObserver` cannot see. The observer callback now re-checks once ~300ms after the last class mutation, so the bar settles flush with the composer's final height. (Backport of v2.10.2.)
+
 ## [1.10.1] - 2026-06-12
 
 ### Changed
