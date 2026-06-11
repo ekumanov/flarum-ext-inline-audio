@@ -99,7 +99,7 @@ app.initializers.add('ekumanov/flarum-ext-inline-audio', () => {
 
         // ── Adjust bar position when Flarum composer is open ─────────────────
 
-        new MutationObserver(adjustBarForComposer).observe(document.body, {
+        new MutationObserver(onComposerMutation).observe(document.body, {
             childList: true,
             subtree: true,
             attributes: true,
@@ -109,13 +109,22 @@ app.initializers.add('ekumanov/flarum-ext-inline-audio', () => {
         adjustBarForComposer();
     }
 
+    // Track whatever height the composer currently occupies — including the
+    // minimized strip, which the bar deliberately sits above. (Don't special-case
+    // minimized: Flarum 1.8 and 2.x class it `minimized`, not `Composer--minimized`.)
     function adjustBarForComposer() {
         const composer = document.querySelector('.Composer');
-        if (!composer || composer.classList.contains('Composer--minimized')) {
-            bar.style.bottom = '';
-        } else {
-            bar.style.bottom = composer.offsetHeight + 'px';
-        }
+        bar.style.bottom = composer ? composer.offsetHeight + 'px' : '';
+    }
+
+    // Composer height changes are jQuery-animated (~200ms) through style
+    // mutations the class-filtered observer can't see — re-check once after
+    // the animation has settled or the bar parks at a mid-animation offset.
+    let composerSettleTimer = null;
+    function onComposerMutation() {
+        adjustBarForComposer();
+        clearTimeout(composerSettleTimer);
+        composerSettleTimer = setTimeout(adjustBarForComposer, 300);
     }
 
     // ── Track the active filename button ──────────────────────────────────────
