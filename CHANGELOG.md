@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.10.1] - 2026-06-12
+
+### Changed
+- The global player bar — including its `<audio controls>` element — is now built lazily on the first play click instead of during `app.boot`. Creating the media element and inserting the bar into `<body>` cost ~25ms of main-thread time on a phone-class CPU on every page load; the initializer now only registers the post-body `MutationObserver` (~0.05ms). The composer-position observer and Media Session action handlers are likewise registered on first use, so pages where no audio is played no longer run a body-wide attribute observer at all. No user-visible behavior change: the bar was hidden until first play anyway. (Backport of v2.10.1; measured on the Flarum 2.0 build.)
+
 ## [1.10.0] - 2026-05-24
 
 ### Added
