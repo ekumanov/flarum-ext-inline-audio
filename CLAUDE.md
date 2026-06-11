@@ -23,8 +23,8 @@ There is no test suite.
 The extension follows the standard Flarum extension pattern:
 
 - **`extend.php`** — PHP bootstrap that wires everything together: registers the compiled JS, CSS, BBCode formatter, and locales with Flarum's extender system.
-- **`js/src/forum/index.js`** — All JS logic. Uses a `MutationObserver` to watch for `.Post-body` elements added to the DOM, then scans their `<a>` tags for audio file extensions and replaces matching links with a `<span class="pc-audio-wrap">` containing a styled download link and an `<audio controls>` element. Also attaches a global `play` event listener to auto-pause other players.
-- **`resources/css/audio-player.css`** — Styles for `.pc-audio-wrap` and `.pc-audio-name`. Includes dark mode support via `color-scheme`.
+- **`js/src/forum/index.js`** — All JS logic. Uses a `MutationObserver` to watch for `.Post-body` elements added to the DOM, then scans their `<a>` tags for audio file extensions and replaces matching links with a `<span class="pc-audio-wrap">` play button. All play buttons drive a single global player bar (filename button, `<audio controls>`, download and close buttons) fixed to the bottom of the viewport. The bar — including its composer-position observer and Media Session handlers — is built lazily on the first play click via `ensureBar()`: creating an `<audio controls>` element and appending it to `<body>` costs ~25ms on a phone-class CPU, so it must stay off the `app.boot` path.
+- **`resources/css/audio-player.css`** — Styles for `.pc-audio-wrap`, `.pc-audio-name` and the `.pc-player-bar`. Includes dark mode support via `color-scheme`.
 - **`locale/en.yml`** — Single translation key for the BBCode tag description.
 
 ### How audio detection works

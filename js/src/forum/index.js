@@ -3,33 +3,120 @@ import app from 'flarum/forum/app';
 app.initializers.add('ekumanov/flarum-ext-inline-audio', () => {
     const audioRe = /\.(mp3|wav|ogg|flac|m4a|mpeg|mpg|mp4|wave|aac|webm)(\?[^#]*)?(#.*)?$/i;
 
-    // ── Build the global player bar ───────────────────────────────────────────
+    // ── Global player bar (created lazily on first play) ─────────────────────
+    //
+    // Building the bar — in particular creating an <audio controls> element and
+    // appending it to <body> — costs ~25ms on a phone-class CPU. The bar is
+    // hidden until a track is loaded, so none of this may run during app.boot:
+    // everything bar-related (DOM, listeners, Media Session handlers, composer
+    // observer) is deferred to the first play click via ensureBar().
 
-    const bar = document.createElement('div');
-    bar.className = 'pc-player-bar';
-    bar.hidden = true;
-    bar.setAttribute('role', 'region');
-    bar.setAttribute('aria-label', 'Audio player');
+    let bar = null;
+    let barName = null;
+    let barAudio = null;
+    let barDownload = null;
 
-    const barName = document.createElement('button');
-    barName.className = 'pc-player-bar-name';
-    barName.setAttribute('aria-label', 'Scroll to post');
+    function ensureBar() {
+        if (bar) return;
 
-    const barAudio = document.createElement('audio');
-    barAudio.controls = true;
-    barAudio.preload = 'none';
+        bar = document.createElement('div');
+        bar.className = 'pc-player-bar';
+        bar.hidden = true;
+        bar.setAttribute('role', 'region');
+        bar.setAttribute('aria-label', 'Audio player');
 
-    const barDownload = document.createElement('a');
-    barDownload.className = 'pc-player-bar-download';
-    barDownload.setAttribute('aria-label', 'Download');
+        barName = document.createElement('button');
+        barName.className = 'pc-player-bar-name';
+        barName.setAttribute('aria-label', 'Scroll to post');
 
-    const barClose = document.createElement('button');
-    barClose.className = 'pc-player-bar-close';
-    barClose.setAttribute('aria-label', 'Close player');
-    barClose.textContent = '✕';
+        barAudio = document.createElement('audio');
+        barAudio.controls = true;
+        barAudio.preload = 'none';
 
-    bar.append(barName, barAudio, barDownload, barClose);
-    document.body.appendChild(bar);
+        barDownload = document.createElement('a');
+        barDownload.className = 'pc-player-bar-download';
+        barDownload.setAttribute('aria-label', 'Download');
+        barDownload.hidden = app.forum.attribute('ekumanov-inline-audio.showDownloadButton') === false;
+
+        const barClose = document.createElement('button');
+        barClose.className = 'pc-player-bar-close';
+        barClose.setAttribute('aria-label', 'Close player');
+        barClose.textContent = '✕';
+
+        bar.append(barName, barAudio, barDownload, barClose);
+        document.body.appendChild(bar);
+
+        // ── Media Session API (lock screen / OS media controls) ──────────────
+
+        if ('mediaSession' in navigator) {
+            const safeSet = (action, handler) => {
+                try { navigator.mediaSession.setActionHandler(action, handler); } catch (e) { /* unsupported action */ }
+            };
+            safeSet('play', () => barAudio.play());
+            safeSet('pause', () => barAudio.pause());
+            safeSet('stop', () => { barAudio.pause(); barAudio.currentTime = 0; });
+        }
+
+        // ── Bar controls ──────────────────────────────────────────────────────
+
+        barDownload.addEventListener('click', (e) => {
+            e.preventDefault();
+            triggerDownload(barDownload.href, barDownload.getAttribute('download') || barDownload.href.split('/').pop());
+        });
+
+        barName.addEventListener('click', () => {
+            if (currentBtn) currentBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        });
+
+        barClose.addEventListener('click', () => {
+            barAudio.pause();
+            barAudio.src = '';
+            bar.hidden = true;
+            setCurrentBtn(null);
+            clearMediaSession();
+        });
+
+        barAudio.addEventListener('play', () => {
+            bar.setAttribute('data-playing', '');
+            if (currentBtn) {
+                currentBtn.setAttribute('data-playing', '');
+                currentBtn.setAttribute('aria-label', 'Pause ' + currentBtn.textContent);
+            }
+        });
+
+        barAudio.addEventListener('pause', () => {
+            bar.removeAttribute('data-playing');
+            if (currentBtn) {
+                currentBtn.removeAttribute('data-playing');
+                currentBtn.setAttribute('aria-label', 'Resume ' + currentBtn.textContent);
+            }
+        });
+
+        barAudio.addEventListener('ended', () => {
+            bar.hidden = true;
+            setCurrentBtn(null);
+        });
+
+        // ── Adjust bar position when Flarum composer is open ─────────────────
+
+        new MutationObserver(adjustBarForComposer).observe(document.body, {
+            childList: true,
+            subtree: true,
+            attributes: true,
+            attributeFilter: ['class'],
+        });
+        // The composer may already be open by the time the bar is created.
+        adjustBarForComposer();
+    }
+
+    function adjustBarForComposer() {
+        const composer = document.querySelector('.Composer');
+        if (!composer || composer.classList.contains('Composer--minimized')) {
+            bar.style.bottom = '';
+        } else {
+            bar.style.bottom = composer.offsetHeight + 'px';
+        }
+    }
 
     // ── Track the active filename button ──────────────────────────────────────
 
@@ -50,13 +137,8 @@ app.initializers.add('ekumanov/flarum-ext-inline-audio', () => {
 
     // ── Load a track into the bar ─────────────────────────────────────────────
 
-    let downloadVisibilitySet = false;
-
     function loadTrack(url, name, btn) {
-        if (!downloadVisibilitySet) {
-            barDownload.hidden = app.forum.attribute('ekumanov-inline-audio.showDownloadButton') === false;
-            downloadVisibilitySet = true;
-        }
+        ensureBar();
         setCurrentBtn(btn);
         barName.textContent = name;
         barName.setAttribute('aria-label', 'Scroll to post: ' + name);
@@ -83,15 +165,6 @@ app.initializers.add('ekumanov/flarum-ext-inline-audio', () => {
         try { navigator.mediaSession.metadata = null; } catch (e) { /* ignore */ }
     }
 
-    if ('mediaSession' in navigator) {
-        const safeSet = (action, handler) => {
-            try { navigator.mediaSession.setActionHandler(action, handler); } catch (e) { /* unsupported action */ }
-        };
-        safeSet('play', () => barAudio.play());
-        safeSet('pause', () => barAudio.pause());
-        safeSet('stop', () => { barAudio.pause(); barAudio.currentTime = 0; });
-    }
-
     // ── Download helper (used by bar download button) ─────────────────────────
 
     function triggerDownload(url, filename) {
@@ -108,64 +181,6 @@ app.initializers.add('ekumanov/flarum-ext-inline-audio', () => {
             })
             .catch(() => window.open(url, '_blank'));
     }
-
-    // ── Bar controls ──────────────────────────────────────────────────────────
-
-    barDownload.addEventListener('click', (e) => {
-        e.preventDefault();
-        triggerDownload(barDownload.href, barDownload.getAttribute('download') || barDownload.href.split('/').pop());
-    });
-
-    barName.addEventListener('click', () => {
-        if (currentBtn) currentBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    });
-
-    barClose.addEventListener('click', () => {
-        barAudio.pause();
-        barAudio.src = '';
-        bar.hidden = true;
-        setCurrentBtn(null);
-        clearMediaSession();
-    });
-
-    barAudio.addEventListener('play', () => {
-        bar.setAttribute('data-playing', '');
-        if (currentBtn) {
-            currentBtn.setAttribute('data-playing', '');
-            currentBtn.setAttribute('aria-label', 'Pause ' + currentBtn.textContent);
-        }
-    });
-
-    barAudio.addEventListener('pause', () => {
-        bar.removeAttribute('data-playing');
-        if (currentBtn) {
-            currentBtn.removeAttribute('data-playing');
-            currentBtn.setAttribute('aria-label', 'Resume ' + currentBtn.textContent);
-        }
-    });
-
-    barAudio.addEventListener('ended', () => {
-        bar.hidden = true;
-        setCurrentBtn(null);
-    });
-
-    // ── Adjust bar position when Flarum composer is open ─────────────────────
-
-    function adjustBarForComposer() {
-        const composer = document.querySelector('.Composer');
-        if (!composer || composer.classList.contains('Composer--minimized')) {
-            bar.style.bottom = '';
-        } else {
-            bar.style.bottom = composer.offsetHeight + 'px';
-        }
-    }
-
-    new MutationObserver(adjustBarForComposer).observe(document.body, {
-        childList: true,
-        subtree: true,
-        attributes: true,
-        attributeFilter: ['class'],
-    });
 
     // ── Helpers ───────────────────────────────────────────────────────────────
 
@@ -263,6 +278,8 @@ app.initializers.add('ekumanov/flarum-ext-inline-audio', () => {
     }
 
     // ── MutationObserver ──────────────────────────────────────────────────────
+    // Registered at init on purpose (it must see the very first render's posts);
+    // registration itself is sub-0.1ms, the cost was only ever the bar build.
 
     new MutationObserver((muts) => {
         muts.forEach((m) => {
