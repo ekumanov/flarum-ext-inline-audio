@@ -31,7 +31,7 @@ app.initializers.add('ekumanov/flarum-ext-inline-audio', () => {
 
         barAudio = document.createElement('audio');
         barAudio.controls = true;
-        barAudio.preload = 'none';
+        barAudio.preload = 'metadata'; // If set to none volume cannot be adjusted before playing, really bad experience
 
         barDownload = document.createElement('button');
         barDownload.className = 'pc-player-bar-download';
