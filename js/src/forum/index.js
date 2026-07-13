@@ -33,7 +33,7 @@ app.initializers.add('ekumanov/flarum-ext-inline-audio', () => {
         barAudio.controls = true;
         barAudio.preload = 'none';
 
-        barDownload = document.createElement('a');
+        barDownload = document.createElement('button');
         barDownload.className = 'pc-player-bar-download';
         barDownload.setAttribute('aria-label', 'Download');
         barDownload.hidden = app.forum.attribute('ekumanov-inline-audio.showDownloadButton') === false;
@@ -41,9 +41,12 @@ app.initializers.add('ekumanov/flarum-ext-inline-audio', () => {
         const barClose = document.createElement('button');
         barClose.className = 'pc-player-bar-close';
         barClose.setAttribute('aria-label', 'Close player');
-        barClose.textContent = '✕';
 
-        bar.append(barName, barAudio, barDownload, barClose);
+        const buttonsContainer = document.createElement('div');
+        buttonsContainer.className = 'pc-player-bar-buttons-container';
+        buttonsContainer.append(barDownload, barClose);
+
+        bar.append(barName, barAudio, buttonsContainer);
         document.body.appendChild(bar);
 
         // ── Media Session API (lock screen / OS media controls) ──────────────

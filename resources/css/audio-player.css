@@ -12,15 +12,14 @@
     background: none;
     border: none;
     cursor: pointer;
-    font-size: 0.95em;
+    font-size: 1.125em;
     font-family: inherit;
-    color: inherit;
+    color: var(--link-color);
     text-decoration: none !important;
     border-bottom: none !important;
     padding: 0;
-    text-align: left;
+    text-align: center;
     max-width: 100%;
-    opacity: 0.7;
 }
 
 .pc-audio-name-text {
@@ -30,7 +29,7 @@
     min-width: 0;
 }
 
-.pc-audio-name:hover { opacity: 1; text-decoration: none !important; }
+.pc-audio-name:hover { color: inherit; text-decoration: none !important; }
 
 .pc-audio-name:focus-visible {
     outline: 2px solid currentColor;
@@ -88,25 +87,41 @@
     background: var(--header-bg, #fff);
     border-top: 1px solid rgba(0, 0, 0, 0.1);
     box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.12);
+
+    transform: translateY(0);
+    opacity: 1;
+    transition:
+        transform 250ms ease,
+        opacity 250ms ease;
 }
 
-.pc-player-bar[hidden] { display: none; }
+.pc-player-bar[hidden] {
+    display: flex;
+    transform: translateY(100%);
+    opacity: 0;
+    pointer-events: none;
+}
 
 .pc-player-bar-name {
     background: none;
     border: none;
-    color: inherit;
+    color: var(--button-toggled-color);;
     font-family: inherit;
-    font-size: 0.9em;
-    opacity: 0.75;
+    font-size: 1em;
+    opacity: 1;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    flex: 0 1 220px;
+    flex: 0 1 120px;
     min-width: 0;
     cursor: pointer;
     padding: 0;
-    text-align: left;
+    text-align: center;
+}
+
+.pc-player-bar-buttons-container {
+    display: flex;
+    flex: 0 1 120px;
 }
 
 .pc-player-bar-name:hover { opacity: 1; }
@@ -120,11 +135,8 @@
     flex: 1;
     min-width: 0;
     height: 36px;
-    color-scheme: dark light; /* fallback: OS preference */
+    color-scheme: inherit; /* Manually setting behaves weird in some cases */
 }
-
-html[data-theme="light"] .pc-player-bar audio { color-scheme: light; }
-html[data-theme="dark"]  .pc-player-bar audio { color-scheme: dark; }
 
 /* Respect Flarum's pinned discussion-list pane on wide screens.
    The player bar lives on <body>, not inside .App, so we use :has()
@@ -141,10 +153,14 @@ html[data-theme="dark"]  .pc-player-bar audio { color-scheme: dark; }
 
 .pc-player-bar-download {
     flex-shrink: 0;
-    opacity: 0.5;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+    margin: auto;
     padding: 4px 6px;
     line-height: 1;
-    color: inherit;
+    color: var(--header-colored-control-color);;
     text-decoration: none;
 }
 
@@ -155,7 +171,14 @@ html[data-theme="dark"]  .pc-player-bar audio { color-scheme: dark; }
     font-size: 1rem;
 }
 
-.pc-player-bar-download:hover { opacity: 1; }
+.pc-player-bar-close::before {
+    font-family: "Font Awesome 5 Free";
+    font-weight: 900;
+    content: "\f00d"; /* fa-times */
+    font-size: 1rem;
+}
+
+.pc-player-bar-download:hover { color: var(--button-toggled-color); }
 
 .pc-player-bar-download:focus-visible {
     outline: 2px solid currentColor;
@@ -168,13 +191,14 @@ html[data-theme="dark"]  .pc-player-bar audio { color-scheme: dark; }
     border: none;
     cursor: pointer;
     font-size: 1rem;
-    opacity: 0.5;
+    margin: auto;
+    margin-right: 50px;
     padding: 4px 6px;
     line-height: 1;
-    color: inherit;
+    color: var(--header-colored-control-color);;
 }
 
-.pc-player-bar-close:hover { opacity: 1; }
+.pc-player-bar-close:hover { color: var(--button-toggled-color); }
 
 .pc-player-bar-close:focus-visible {
     outline: 2px solid currentColor;
