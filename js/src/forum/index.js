@@ -264,6 +264,16 @@ app.initializers.add('ekumanov/flarum-ext-inline-audio', () => {
     // ── Process post ──────────────────────────────────────────────────────────
 
     function processPost(el) {
+        // Never rewrite a live rich-text editor. fof/rich-text's TipTap/ProseMirror editor
+        // element carries the `Post-body` class (to inherit post styling) but is a
+        // contenteditable surface whose DOM ProseMirror owns: it re-renders to restore its
+        // model whenever that DOM is mutated from outside. Replacing an audio <a> in there
+        // makes ProseMirror redraw the <a>, which re-triggers this observer → an unbounded
+        // rewrite/redraw loop that hard-hangs the browser (seen when uploading/inserting an
+        // mp3 in the composer). Links must stay plain while editing; they become players once
+        // the post is rendered.
+        if (el.isContentEditable) return;
+
         // Auto-detected audio links → replace <a> with <span><button>
         el.querySelectorAll('a[href]:not([data-ap])').forEach((a) => {
             if (!audioRe.test(a.getAttribute('href'))) return;

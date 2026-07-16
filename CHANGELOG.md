@@ -1,5 +1,10 @@
 # Changelog
 
+## [2.10.3] - 2026-07-16
+
+### Fixed
+- The composer could hard-hang the browser tab when an audio file was uploaded (or inserted from the Media Manager): the page froze and the draft text was lost. fof/rich-text's live editor element carries the `Post-body` class and is `contenteditable`, so the post-body `MutationObserver` treated it as a rendered post and rewrote the inserted audio `<a>` into a player; the rich-text editor immediately redrew to restore its own DOM, which re-triggered the observer, looping until the tab locked up. `processPost` now bails out on any `contenteditable` element — audio links stay plain while editing and still become players once the post is rendered. Rendered posts (the actual feature) are unaffected.
+
 ## [2.10.2] - 2026-06-12
 
 ### Fixed
