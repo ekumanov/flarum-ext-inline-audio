@@ -133,9 +133,14 @@ class FilenameLink implements Template
     public function name(): string  { return 'Filename link'; }
     public function description(): string { return 'Generates a link with the filename as text'; }
 
-    public function preview(File $file): string
+    // fof/upload 2.0.0-beta.7+ declares this optional $displayName parameter
+    // on the interface. Omitting it is a fatal error for every PHP process
+    // that boots Flarum (queue worker, scheduler, console), so keep it.
+    public function preview(File $file, ?string $displayName = null): string
     {
-        return '[' . $file->base_name . '](' . $file->url . ')';
+        $label = trim(preg_replace('/\s+/u', ' ', (string) $displayName));
+
+        return '[' . ($label !== '' ? $label : $file->base_name) . '](' . $file->url . ')';
     }
 }
 

@@ -52,7 +52,7 @@ app.initializers.add('ekumanov/flarum-ext-inline-audio', () => {
             const safeSet = (action, handler) => {
                 try { navigator.mediaSession.setActionHandler(action, handler); } catch (e) { /* unsupported action */ }
             };
-            safeSet('play', () => barAudio.play());
+            safeSet('play', () => playBar());
             safeSet('pause', () => barAudio.pause());
             safeSet('stop', () => { barAudio.pause(); barAudio.currentTime = 0; });
         }
@@ -65,6 +65,9 @@ app.initializers.add('ekumanov/flarum-ext-inline-audio', () => {
         });
 
         barName.addEventListener('click', () => {
+            // PostStream may have unloaded and re-rendered the post since the
+            // track started, leaving currentBtn detached — find its replacement.
+            if (currentBtn && !currentBtn.isConnected) setCurrentBtn(findButtonFor(currentUrl));
             if (currentBtn) currentBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
         });
 
@@ -72,6 +75,7 @@ app.initializers.add('ekumanov/flarum-ext-inline-audio', () => {
             barAudio.pause();
             barAudio.src = '';
             bar.hidden = true;
+            currentUrl = null;
             setCurrentBtn(null);
             clearMediaSession();
         });
@@ -94,17 +98,36 @@ app.initializers.add('ekumanov/flarum-ext-inline-audio', () => {
 
         barAudio.addEventListener('ended', () => {
             bar.hidden = true;
+            currentUrl = null;
             setCurrentBtn(null);
         });
 
         // ── Adjust bar position when Flarum composer is open ─────────────────
-
-        new MutationObserver(onComposerMutation).observe(document.body, {
-            childList: true,
-            subtree: true,
-            attributes: true,
-            attributeFilter: ['class'],
-        });
+        //
+        // Once mounted, core's composer only ever changes its classes and
+        // (jQuery-animated) height, so a ResizeObserver on that one element
+        // sees every open/close/minimize/drag-resize, frame by frame. It
+        // replaces a body-wide class observer that forced a layout on every
+        // class toggle anywhere on the page for the rest of the session.
+        //
+        // Core mounts `.Composer` into `#composer` lazily, on first open, so
+        // it may not exist yet: watch that one host for the mount (childList
+        // only, no subtree), then hand over to the ResizeObserver.
+        if ('ResizeObserver' in window) {
+            const resizeObserver = new ResizeObserver(adjustBarForComposer);
+            const attach = () => {
+                const composer = document.querySelector('.Composer');
+                if (composer) resizeObserver.observe(composer);
+                return !!composer;
+            };
+            const host = document.getElementById('composer');
+            if (!attach() && host) {
+                const mountObserver = new MutationObserver(() => {
+                    if (attach()) mountObserver.disconnect();
+                });
+                mountObserver.observe(host, { childList: true });
+            }
+        }
         // The composer may already be open by the time the bar is created.
         adjustBarForComposer();
     }
@@ -113,23 +136,34 @@ app.initializers.add('ekumanov/flarum-ext-inline-audio', () => {
     // minimized strip, which the bar deliberately sits above. (Don't special-case
     // minimized: Flarum 1.8 and 2.x class it `minimized`, not `Composer--minimized`.)
     function adjustBarForComposer() {
+        if (!bar || bar.hidden) return;
         const composer = document.querySelector('.Composer');
-        bar.style.bottom = composer ? composer.offsetHeight + 'px' : '';
-    }
-
-    // Composer height changes are jQuery-animated (~200ms) through style
-    // mutations the class-filtered observer can't see — re-check once after
-    // the animation has settled or the bar parks at a mid-animation offset.
-    let composerSettleTimer = null;
-    function onComposerMutation() {
-        adjustBarForComposer();
-        clearTimeout(composerSettleTimer);
-        composerSettleTimer = setTimeout(adjustBarForComposer, 300);
+        const h = composer ? composer.offsetHeight : 0;
+        bar.style.bottom = h ? h + 'px' : '';
     }
 
     // ── Track the active filename button ──────────────────────────────────────
 
+    // The playing track is identified by URL, not by button: PostStream can
+    // unload and re-render a post (or the user can navigate away and back)
+    // while it plays, and the fresh button must still act as pause/resume.
     let currentBtn = null;
+    let currentUrl = null;
+
+    function findButtonFor(url) {
+        if (!url) return null;
+        for (const b of document.querySelectorAll('.pc-audio-name[data-audio-url]')) {
+            if (b.getAttribute('data-audio-url') === url) return b;
+        }
+        return null;
+    }
+
+    function playBar() {
+        // play() rejects on autoplay denial, a 404, or an AbortError from
+        // switching tracks quickly; none of those deserve an uncaught error.
+        const p = barAudio.play();
+        if (p && p.catch) p.catch(() => {});
+    }
 
     function setCurrentBtn(btn) {
         if (currentBtn) {
@@ -140,7 +174,12 @@ app.initializers.add('ekumanov/flarum-ext-inline-audio', () => {
         currentBtn = btn;
         if (btn) {
             btn.setAttribute('data-current', '');
-            btn.setAttribute('aria-label', 'Pause ' + btn.textContent);
+            if (barAudio && !barAudio.paused) {
+                btn.setAttribute('data-playing', '');
+                btn.setAttribute('aria-label', 'Pause ' + btn.textContent);
+            } else {
+                btn.setAttribute('aria-label', 'Resume ' + btn.textContent);
+            }
         }
     }
 
@@ -148,6 +187,7 @@ app.initializers.add('ekumanov/flarum-ext-inline-audio', () => {
 
     function loadTrack(url, name, btn) {
         ensureBar();
+        currentUrl = url;
         setCurrentBtn(btn);
         barName.textContent = name;
         barName.setAttribute('aria-label', 'Scroll to post: ' + name);
@@ -157,7 +197,7 @@ app.initializers.add('ekumanov/flarum-ext-inline-audio', () => {
         barDownload.setAttribute('aria-label', 'Download ' + name);
         bar.hidden = false;
         updateMediaSession(name);
-        if (app.forum.attribute('ekumanov-inline-audio.autoPlay') !== false) barAudio.play();
+        if (app.forum.attribute('ekumanov-inline-audio.autoPlay') !== false) playBar();
     }
 
     // ── Media Session API (lock screen / OS media controls) ──────────────────
@@ -204,7 +244,7 @@ app.initializers.add('ekumanov/flarum-ext-inline-audio', () => {
             try { return decodeURIComponent(text.split('/').pop().split('?')[0]); }
             catch (e) { return text.split('/').pop().split('?')[0]; }
         }
-        return text || decodeURIComponent(a.href.split('/').pop().split('?')[0]);
+        return text || filenameFromUrl(a.href);
     }
 
     function filenameFromUrl(url) {
@@ -250,10 +290,18 @@ app.initializers.add('ekumanov/flarum-ext-inline-audio', () => {
             btn.href = url;
             btn.setAttribute('download', name);
         }
+        if (url === currentUrl && bar && !bar.hidden) {
+            // A re-render of the post that holds the playing track: adopt the
+            // new button once it is in the document (the old one is detached).
+            queueMicrotask(() => {
+                if (btn.isConnected && url === currentUrl && (!currentBtn || !currentBtn.isConnected)) setCurrentBtn(btn);
+            });
+        }
         btn.addEventListener('click', (e) => {
             if (useLink) e.preventDefault();
-            if (btn === currentBtn) {
-                barAudio.paused ? barAudio.play() : barAudio.pause();
+            if (url === currentUrl && bar && !bar.hidden) {
+                if (btn !== currentBtn) setCurrentBtn(btn);
+                barAudio.paused ? playBar() : barAudio.pause();
             } else {
                 loadTrack(url, name, btn);
             }
@@ -300,21 +348,26 @@ app.initializers.add('ekumanov/flarum-ext-inline-audio', () => {
     // Registered at init on purpose (it must see the very first render's posts);
     // registration itself is sub-0.1ms, the cost was only ever the bar build.
 
+    // Posts are collected into a Set first: a batch that adds N nodes inside
+    // one post (our own wraps, link-preview cards, cls-fix wrappers) used to
+    // re-scan that whole post N times.
     new MutationObserver((muts) => {
+        const posts = new Set();
         muts.forEach((m) => {
             m.addedNodes.forEach((node) => {
                 if (node.nodeType !== 1) return;
-                if (node.classList && node.classList.contains('Post-body')) {
-                    processPost(node);
-                } else if (node.querySelectorAll) {
-                    const bodies = node.querySelectorAll('.Post-body');
-                    bodies.forEach((b) => processPost(b));
-                    if (!bodies.length && node.closest) {
-                        const parent = node.closest('.Post-body');
-                        if (parent) processPost(parent);
-                    }
+                if (node.classList.contains('Post-body')) {
+                    posts.add(node);
+                    return;
+                }
+                const parent = node.closest('.Post-body');
+                if (parent) {
+                    posts.add(parent);
+                } else {
+                    node.querySelectorAll('.Post-body').forEach((b) => posts.add(b));
                 }
             });
         });
+        posts.forEach(processPost);
     }).observe(document.documentElement, { childList: true, subtree: true });
 });

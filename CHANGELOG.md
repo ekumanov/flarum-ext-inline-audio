@@ -1,5 +1,15 @@
 # Changelog
 
+## [2.10.4] - 2026-09-24
+
+### Fixed
+- Once a track had been played, a body-wide `MutationObserver` forced a layout on every class change anywhere on the page for the rest of the session (scroll-driven highlight, scrubber, header affix…). The player bar now follows the composer with a single `ResizeObserver` on the composer element, attached when core mounts it. That also tracks drag-resizes and height animations the old class observer could not see, so the 300ms re-check timer is gone.
+- Play state is tied to the track URL rather than to the button element. When PostStream unloaded and re-rendered the post holding the playing track, or the reader navigated away and back, the new button showed no pause state, and clicking it restarted the track from 0. "Scroll to post" silently did nothing on the detached button. The re-rendered button is now adopted as the current one: clicking it pauses and resumes, and the bar's name scrolls to it.
+- The post observer re-scanned a whole post once per node added inside it in the same batch (its own player wraps, link-preview cards…). Posts are now collected into a set and processed once per mutation batch.
+- A link whose text was empty and whose URL had a malformed `%` escape threw `URIError`, stopping the players for the rest of that batch.
+- `play()` rejections (autoplay denial, quick track switching, a 404) no longer surface as uncaught promise errors.
+- README: the FoF Upload filename-link template now uses the `preview(File $file, ?string $displayName = null)` signature that fof/upload 2.0.0-beta.7+ requires. The old snippet is a fatal error for every PHP process that boots Flarum on current fof/upload.
+
 ## [2.10.3] - 2026-07-16
 
 ### Fixed
